@@ -8,6 +8,8 @@ Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES
 ## Working rules (Claude Pro budget, spread-out pace)
 - One session = one row of the build table below. Stop at the session boundary.
 - Read only the files the current session needs; don't re-scan the whole repo.
+- At session start, run `git fetch && git branch -r` and check for an existing `claude/sN-*` branch for this session. Branches have been shipped to TestFlight before being merged, so the status table on `main` can be out of date.
+- To screenshot the simulator, install from `TARGET_BUILD_DIR` (from `xcodebuild ... -showBuildSettings`), not from `find DerivedData`. There's more than one DerivedData folder, and the wrong one installs a stale build.
 - Development happens on the user's Mac. Claude builds locally for the simulator and fixes errors before handing off:
   `xcodebuild -project VoiceMapper.xcodeproj -scheme VoiceMapper -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build`
   It can also launch the app and screenshot it with `xcrun simctl`. Device tests (mic, headphones, Bluetooth, Face ID) still need the user's iPhone.
@@ -26,9 +28,9 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 
 ## Module layout
 - `AudioEngine` — capture, hear-yourself output, route monitoring + Bluetooth banner
-- `DSP/` — PitchDetector (YIN/MPM), FormantAnalyzer (LPC), SpectralMetrics (H1–H2, CPP, HNR, jitter, shimmer), VoicingDetector
-- `Analysis/` — NoteMapper, ResonanceScorer, StrainGuard, SessionAggregator, HeatmapBinner
-- `UI/` — GridView, RangeTableView, ExerciseViews, HistoryView, SettingsView, OnboardingView
+- `DSP/` — PitchDetector/PitchTracker (YIN), FormantAnalyzer/ResonanceTracker (LPC), VoiceQualityAnalyzer/VoiceQualityTracker (H1–H2, alpha ratio, CPP, HNR, jitter, shimmer, level), NoiseMeter
+- `Analysis/` — NoteMapper, RangeTable, GoalRange, ResonanceGoal, ResonanceScorer, VoicePerception, StrainGuard, HeatmapBinner
+- `UI/` — LiveView, GridView, RangeTableView, HistoryView, HistoryLayers, SafetyViews, BaselineView, HearYourselfSheet, SettingsView, ExercisesView (placeholder); OnboardingView arrives in S12
 - `Store/` — SwiftData models (sessions, grid-cell counts, baseline, goals)
 
 ## Build sessions
@@ -48,3 +50,29 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | todo |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
 | S14 | Buffer | Bug fixes | — | todo |
+
+## Next session: S11 Exercises (Sonnet, build 40)
+S1–S10 are merged into `main` (S10 was PR #11, builds 34–39). TestFlight's latest build is 39.
+
+**Goal:** replace the `ExercisesView` placeholder with the list in WIREFRAMES §5 and the drill in §6.
+- **Header:** "Today: X / cap min" progress, from `strain.todaySeconds` and `StrainGuard.capKey`.
+- **Exercises, in order:**
+  1. Warm-up (required): gentle hums or lip trills and easy slides. It covers the warm-up prompts PLAN §5 assigns to the strain guard.
+  2. Pitch slides
+  3. Hold target pitch
+  4. Resonance "big dog → small dog"
+  5. Vowel ladder (ee/ah)
+  6. Reading: Rainbow Passage (reuse the text and attribution in `BaselineView`)
+  7. Cool-down
+- **Target-hold drill (§6):** the target note comes from `GoalRange` (`@AppStorage` low/high), falling back to the baseline median. Show a hold progress bar (e.g. 6s/10s) that counts only time within ±1 semitone of the target, using `audio.pitch`.
+- **Completion:** a simple per-day "done" tick for each exercise is enough. Store it in `@AppStorage` or a small SwiftData model, whichever is simpler.
+
+**Plug into what already exists (don't re-implement):**
+- **Capture:** `audio.setListening(true/false)`. `SessionRecorder` already logs sessions, and `StrainGuard.observe` already runs on every capture, so strain alerts and the daily cap work in exercises automatically.
+- **Alerts:** `SafetyAlertOverlay` already sits over every tab (`RootTabView`). Respect `strain.restUntil`: while resting, show `RestBanner` and don't auto-start capture.
+- **Live readings:** `audio.pitch`, `audio.resonance` (score 0–100) and `audio.quality`.
+
+**Read first:** `UI/ExercisesView.swift`, `UI/LiveView.swift` (capture buttons and rest banner pattern), `UI/SafetyViews.swift`, `Analysis/GoalRange.swift`, `Analysis/StrainGuard.swift` (public API only).
+
+**Wrap-up:** build for the simulator, bump to build 40, archive and upload to TestFlight, open a PR from `claude/s11-exercises`, merge it, then mark S11 done.
+
