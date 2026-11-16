@@ -13,7 +13,7 @@ Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES
 - Development happens on the user's Mac. Claude builds locally for the simulator and fixes errors before handing off:
   `xcodebuild -project VoiceMapper.xcodeproj -scheme VoiceMapper -destination 'platform=iOS Simulator,name=iPhone 18 Pro' build`
   It can also launch the app and screenshot it with `xcrun simctl`. Device tests (mic, headphones, Bluetooth, Face ID) still need the user's iPhone.
-- The iPhone gets builds through TestFlight (internal testing), not by cable — the user doesn't want Developer Mode on. To ship a build: bump `CURRENT_PROJECT_VERSION`, then `xcodebuild ... -configuration Release -destination 'generic/platform=iOS' -archivePath <path> -allowProvisioningUpdates archive`, then `xcodebuild -exportArchive` with an ExportOptions.plist (`method` app-store-connect, `destination` upload, `teamID` R6PF4UF778).
+- The iPhone gets builds through TestFlight (internal testing), not by cable — the user doesn't want Developer Mode on. To ship a build: bump `CURRENT_PROJECT_VERSION`, then `xcodebuild ... -configuration Release -destination 'generic/platform=iOS' -archivePath <path> -allowProvisioningUpdates archive`, then `xcodebuild -exportArchive` with an ExportOptions.plist (`method` app-store-connect, `destination` upload, `teamID` R6PF4UF778, `manageAppVersionAndBuildNumber` false — otherwise Xcode silently bumps the build number on upload).
 - Commit + push at the end of every session, then update the status column below.
 - Use Sonnet for routine UI sessions; Opus for DSP sessions (S3, S5, S6, S10).
 
@@ -51,8 +51,8 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
 | S14 | Buffer | Bug fixes | — | todo |
 
-## Next session: S11 Exercises (Sonnet, build 40)
-S1–S10 are merged into `main` (S10 was PR #11, builds 34–39). TestFlight's latest build is 39.
+## Next session: S11 Exercises (Sonnet, build 41)
+S1–S10 are merged into `main` (S10 was PR #11, builds 34–39). TestFlight's latest build is 40 (same code as `main`).
 
 **Goal:** replace the `ExercisesView` placeholder with the list in WIREFRAMES §5 and the drill in §6.
 - **Header:** "Today: X / cap min" progress, from `strain.todaySeconds` and `StrainGuard.capKey`.
@@ -74,5 +74,5 @@ S1–S10 are merged into `main` (S10 was PR #11, builds 34–39). TestFlight's l
 
 **Read first:** `UI/ExercisesView.swift`, `UI/LiveView.swift` (capture buttons and rest banner pattern), `UI/SafetyViews.swift`, `Analysis/GoalRange.swift`, `Analysis/StrainGuard.swift` (public API only).
 
-**Wrap-up:** build for the simulator, bump to build 40, archive and upload to TestFlight, open a PR from `claude/s11-exercises`, merge it, then mark S11 done.
+**Wrap-up:** build for the simulator, bump to build 41, archive and upload to TestFlight, open a PR from `claude/s11-exercises`, merge it, then mark S11 done.
 
