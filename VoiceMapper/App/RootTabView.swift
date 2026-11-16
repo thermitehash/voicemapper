@@ -6,6 +6,8 @@ enum AppTab: Hashable {
 }
 
 struct RootTabView: View {
+    @Environment(StrainGuard.self) private var strain
+    @Environment(SessionRecorder.self) private var recorder
     @State private var selection: AppTab = .live
 
     var body: some View {
@@ -30,10 +32,18 @@ struct RootTabView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(AppTab.settings)
         }
+        .overlay { SafetyAlertOverlay() }
+        .alert("Keep this session?", isPresented: noisyPromptShown, presenting: recorder.noisySession) { session in
+            Button("Keep") { recorder.noisySession = nil }
+            Button("Delete", role: .destructive) { recorder.delete(session) }
+        } message: { session in
+            Text("About \(Int(((session.noisyShare ?? 0) * 100).rounded()))% of it had loud background noise, so its readings may be off.")
+        }
+        .animation(.default, value: strain.alert)
     }
-}
 
-#Preview {
-    RootTabView()
-        .environment(AudioEngine())
+    private var noisyPromptShown: Binding<Bool> {
+        Binding(get: { recorder.noisySession != nil && strain.alert == nil },
+                set: { if !$0 { recorder.noisySession = nil } })
+    }
 }
