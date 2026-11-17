@@ -1,4 +1,4 @@
-# DSP accuracy check (S13)
+# DSP accuracy check (S13, S15)
 
 How closely VoiceMapper's pitch, formant and resonance measurements match known values, and what changed as a result.
 
@@ -9,7 +9,7 @@ How closely VoiceMapper's pitch, formant and resonance measurements match known 
 - `run.sh --probe` adds finer sweeps: pitch every 5 Hz from 90 to 600 Hz on several vowels, alternating-amplitude pulses (diplophonia), breathy noise, and resonance against F0.
 - `run.sh a.wav b.wav …` prints median F0, F1–F4, ΔF and score per file, for comparing real recordings with Praat (see below).
 
-Praat isn't installed on the dev Mac. The real-voice comparison is left as an optional step for the user.
+Praat isn't installed on the dev Mac. The real-voice reference set (S15) is ready to fill in: see `Tools/DSPCheck/reference/README.md`.
 
 ## Results after the S13 fixes
 
@@ -31,10 +31,46 @@ Praat isn't installed on the dev Mac. The real-voice comparison is left as an op
 - **Resonance between 260 and 350 Hz is patchy** when harmonics fall badly against F1/F2: steady /ɑ/ at 260–280 Hz and /æ/ at 280 Hz can read 0. Real voices waver, and the tracker's 15-frame median absorbs one-off misreads, but sustained high, open vowels may still misread.
 - **Weak F4 (back rounded vowels such as /u/).** When LPC misses F4, ΔF is fitted to F1–F3 only and reads darker. Women's /u/ reads 24 against a true 50. Front vowels ("ee") and open vowels ("ah") are reliable, which is why the vowel exercises use them.
 - **Diplophonia.** With strongly alternating cycles (40% amplitude alternation), pitch can read an octave low. The waveform really does repeat every two cycles, so this is ambiguous by nature. Mild alternation (≤20%) is fine.
-- **High open vowels in singing range** (/ɑ/ at 455–475 Hz) can read an octave high. That's above speaking range.
 - **Heavy breath noise** at 200 Hz (noise at a third of peak level) puts 41% of frames off. That's the same as before the fix.
 
-## Comparing real recordings with Praat (optional)
+## Automated verification (S15)
+Two command-line suites turn this page into pass/fail checks. Both exit non-zero on any failure, so they can gate a build.
+
+**`Tools/DSPCheck/run.sh --test`** runs the app's own DSP code on synthetic vowels with known values, plus real recordings when they exist. Result: **1273 of 1273 checks pass.**
+
+| Check | Tolerance | Scope |
+|---|---|---|
+| F0 median | within 5 cents | 65–400 Hz in 5 Hz steps, neutral + 8 vowels |
+| Octave errors | ≤ 5% of frames > 50 cents off | same sweep |
+| Mild diplophonia | ≤ 10% of frames off | 10% and 20% alternation at 120–260 Hz |
+| F1–F3 | within 10% | all 8 vowels |
+| ΔF | within 3% | front and open vowels (/u/ excluded: known F4 limit) |
+| Resonance score | within 5 points | front and open vowels |
+| Resonance gate | no reading above 350 Hz, readings below it | `ResonanceTracker` at 300–450 Hz |
+| Real voice vs Praat | F0 within 20 cents, F1–F3 within 10% | `Tools/DSPCheck/reference/` (waiting on recordings) |
+
+**`Tools/MappingTests/run.sh`** compiles `Analysis/` and `Store/Models.swift` for macOS and checks the mapping layer against known values. Result: **1520 of 1520 checks pass.**
+- `Note` Hz↔MIDI↔name round trips (A4 = 440, C4 = 261.63, semitone rounding).
+- `PerceivedGender` boundaries at 145 / 175 Hz.
+- `GoalPreset` ranges stay inside their zones, listed alphabetically.
+- `ResonanceScorer` endpoints and the uniform-tube ΔF (1000 Hz → 17.5 cm).
+- `GridCellCount.bin` edges.
+- `HeatmapBinner` totals and periods.
+- `GoalRange.closeness` and `direction`, and `ResonanceGoal`.
+- `StrainGuard` on scripted inputs: steady, one measure off, two off, sustained high, sustained loud, noisy, alerts off, cooldown, daily cap, "5 more minutes".
+- `ExerciseLog` day rollover.
+- Progression: plan sizing to the cap, hold steps, safety hold, zone share, resonance days.
+- Exercise library: a basis on every exercise, goal-neutral wording, stage coverage.
+
+A deliberate mutation (moving the 145 Hz boundary to 146) was caught, so the suite tests values, not just that the code runs.
+
+**Fixed by S15.** The sweep found pitch reading an octave high at 370–395 Hz on an /ɑ/ with men's formants, where F1 sits on the 2nd harmonic. The false half-period dip there is only 0.05–0.07 deep, just under the S13 harmonic guard's 0.07 entry gate, while the true period's dip is about 0.001.
+- **New rule:** `PitchDetector` adds a second harmonic-guard rule, so a multiple-lag dip at least 10× deeper also wins.
+- **Limit on the rule:** it only applies when the corrected pitch is 300 Hz or higher. Below that, mild diplophonia (cycles alternating ~20%) has the same dip pattern. In testing it read an octave low on every frame at 200 Hz, the core speaking range for feminine goals.
+- **Bonus:** the same fix cleared the S13 limit at /ɑ/ 455–475 Hz.
+- **Regressions:** none on the S13 tables.
+
+## Comparing real recordings with Praat
 1. Record a few 2–3 second sustained vowels ("ee", "ah", "oo") and a sentence as WAV files, for example with Voice Memos exported as WAV, or QuickTime.
 2. In Praat, open each file and choose View & Edit:
    - Pitch ▸ Get pitch (median from the Pitch listing; pitch range 60–600 Hz).

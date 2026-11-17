@@ -27,6 +27,15 @@ struct PitchDetector {
     /// already-clean dips from triggering it; the ratio keeps noise from it.
     private static let harmonicRatio: Float = 0.5
     private static let harmonicGap: Float = 0.07
+    /// Second harmonic-guard rule for shallower false dips (≈0.03–0.07): a
+    /// multiple-lag dip under this share of the chosen one also wins. A real
+    /// period's multiples are about as deep as it is, never 10× deeper (S15).
+    /// Only when the corrected pitch is at least `harmonicStrongMinHz`: below
+    /// that, mild diplophonia (cycles alternating ~20% in amplitude) looks the
+    /// same and would read an octave low in the core speaking range.
+    private static let harmonicStrongRatio: Float = 0.1
+    private static let harmonicFloor: Float = 0.03
+    private static let harmonicStrongMinHz = 300.0
     private static let silenceRMS: Float = 0.003
 
     let sampleRate: Double
@@ -104,14 +113,17 @@ struct PitchDetector {
         // while the true period's dip is far deeper (≈0.001). A truly periodic
         // voice has multiple-lag dips about as deep as the first, so the first
         // multiple that is much deeper is the real period (S13 check).
-        if clear, cmnd[best] > Self.harmonicGap {
+        if clear, cmnd[best] > Self.harmonicFloor {
             let first = best
             for k in 2...6 {
                 let lag = first * k
                 guard lag + 2 <= tauMax else { break }
-                if let alt = ((lag - 2)...(lag + 2)).min(by: { cmnd[$0] < cmnd[$1] }),
-                   cmnd[alt] < cmnd[first] * Self.harmonicRatio,
-                   cmnd[first] - cmnd[alt] > Self.harmonicGap {
+                guard let alt = ((lag - 2)...(lag + 2)).min(by: { cmnd[$0] < cmnd[$1] }) else { continue }
+                let gapRule = cmnd[alt] < cmnd[first] * Self.harmonicRatio
+                    && cmnd[first] - cmnd[alt] > Self.harmonicGap
+                let strongRule = cmnd[alt] < cmnd[first] * Self.harmonicStrongRatio
+                    && sampleRate / Double(alt) >= Self.harmonicStrongMinHz
+                if gapRule || strongRule {
                     best = alt
                     break
                 }
