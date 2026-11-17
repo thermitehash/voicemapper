@@ -54,8 +54,10 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
 | S16 | Buffer | Bug fixes | — | in progress (build 46 uploaded for internal testers; more fixes from device feedback) |
 
-## Next session: S16 Buffer (Sonnet, build 46)
+## Next session: S16 Buffer, part 2 (Sonnet; Opus if a DSP fix is needed; build 47)
 S1–S15 are merged into `main`. TestFlight's latest build is 46 (S16 part 1, internal only). External testers are still on build 45, pending Beta App Review.
+
+**Start here:** ask the user for feedback from device testing of builds 45/46 and fix what they report. The checks to ask about are in the "What to Test" notes for 45: the plan changes over several days, the hold step moves after 2 passing days, high "ah" stays in the right octave, rough or creaky speech doesn't read an octave low, and "Why this exercise" is clear. If they've recorded the reference WAVs, run the real-voice comparison first.
 
 **Done so far in S16 (build 46, internal testers only):**
 - Exercises need real voiced time to count towards a stage. Before, guided steps could be tapped through silently and still counted as practice.
@@ -64,9 +66,10 @@ S1–S15 are merged into `main`. TestFlight's latest build is 46 (S16 part 1, in
 - History stage markers (dashed lines) on the pitch and resonance charts, read from `ExerciseResult.stage`. Not yet checked visually with real data.
 
 **Open items:**
-- **Real-voice reference set:** the user records the WAVs listed in `Tools/DSPCheck/reference/README.md`, measures them with `measure.praat`, and runs `Tools/DSPCheck/run.sh --test`. Record the result in `docs/ACCURACY.md`. The WAVs are git-ignored; only `reference.json` is committed.
+- **Real-voice reference set:** Praat is installed (`/Applications/Praat.app`), and the pipeline was tested end to end on text-to-speech clips. On a TTS "ee", F2 differed a lot (app 2841 vs Praat 2042 Hz). That's probably the TTS glide, but check F2 on the real "ee" recordings. If it fails, look at the formant numbering in `ResonanceScorer.assigned` and the Praat ceiling. The user records the WAVs listed in `Tools/DSPCheck/reference/README.md`, measures them with `measure.praat`, and runs `Tools/DSPCheck/run.sh --test`. Record the result in `docs/ACCURACY.md`. The WAVs are git-ignored; only `reference.json` is committed.
 - **Device test of the S15 pitch fix:** check high "ah" sirens (370–480 Hz) and normal speech. Rough or creaky voice must not read an octave low.
 - **SLP review** of `docs/EXERCISE_EVIDENCE.md`. Don't call the app "SLP-approved" until one has.
+- **Before the larger external group:** use build 47 or later, not 45. Gate it on device testing of the progression for about a week, the real-voice comparison passing, and ideally the SLP review. The first external build needs Beta App Review (a beta description and contact email in App Store Connect).
 - **Performance:** profile with Instruments on device if anything feels slow.
 - **XCTest target:** optional, if the user wants tests in Xcode. The command-line suites already cover the scope.
 
