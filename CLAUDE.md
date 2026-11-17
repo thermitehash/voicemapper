@@ -46,33 +46,33 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S8 | Storage | SwiftData sessions + baseline recording | Data survives restart | done |
 | S9 | History | History overlay, heat map, Today/Week/Month/All | Overlay + heat map correct | done |
 | S10 | Safety | Weight/health measures, strain alerts, daily cap | Alert fires in strain test | done |
-| S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | todo |
+| S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | done |
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | todo |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
 | S14 | Buffer | Bug fixes | — | todo |
 
-## Next session: S11 Exercises (Sonnet, build 41)
-S1–S10 are merged into `main` (S10 was PR #11, builds 34–39). TestFlight's latest build is 40 (same code as `main`).
+## Next session: S12 Setup & settings (Sonnet, build 42)
+S1–S11 are merged into `main`. TestFlight's latest build is 41 (S11).
 
-**Goal:** replace the `ExercisesView` placeholder with the list in WIREFRAMES §5 and the drill in §6.
-- **Header:** "Today: X / cap min" progress, from `strain.todaySeconds` and `StrainGuard.capKey`.
-- **Exercises, in order:**
-  1. Warm-up (required): gentle hums or lip trills and easy slides. It covers the warm-up prompts PLAN §5 assigns to the strain guard.
-  2. Pitch slides
-  3. Hold target pitch
-  4. Resonance "big dog → small dog"
-  5. Vowel ladder (ee/ah)
-  6. Reading: Rainbow Passage (reuse the text and attribution in `BaselineView`)
-  7. Cool-down
-- **Target-hold drill (§6):** the target note comes from `GoalRange` (`@AppStorage` low/high), falling back to the baseline median. Show a hold progress bar (e.g. 6s/10s) that counts only time within ±1 semitone of the target, using `audio.pitch`.
-- **Completion:** a simple per-day "done" tick for each exercise is enough. Store it in `@AppStorage` or a small SwiftData model, whichever is simpler.
+**Goal:** first-run onboarding, goal picker, the full Settings list from WIREFRAMES §8, Face ID lock and delete-all.
+- **Onboarding** (first launch only; flag in `@AppStorage`):
+  1. A welcome screen with the guiding principle (no "correct" voice).
+  2. The disclaimer: not a substitute for a speech-language pathologist (PLAN §6).
+  3. Mic permission.
+  4. Goal picker.
+  5. Optional baseline recording (reuse `BaselineView`).
+  6. Wired headphones tip.
+- **Goal picker:** feminine / masculine / androgynous / custom. The presets set both `GoalRange` (`goalLowMidi`/`goalHighMidi`) and `ResonanceGoal` (`goalResonanceLow`/`goalResonanceHigh`). Take the typical ranges from `RangeTable` and `VoicePerception` rather than inventing new numbers. Custom keeps the existing tap-to-set (Range tab) and drag-to-set (grid). Reachable again from Settings.
+- **Settings** (keep the existing Voice + Safety sections):
+  - Goal ▸
+  - Face ID lock toggle: `LocalAuthentication`; lock on launch and on return from background; the usage string is already set.
+  - Delete all data ▸: confirm, then delete every SwiftData model (`PracticeSession`, `GridCellCount`, `Baseline`), clear the app's UserDefaults keys (goal, safety, `exercises.doneToday`, hear-yourself prefs, onboarding flag) and return to onboarding.
+  - Research sources ▸: the PLAN §5 list.
+  - Find a voice therapist ▸: an external link is fine; the app itself makes no network calls.
+- **Skip:** "Save recordings" (the app never stores audio; leave it out or say so) and the colour-blind palette (S13).
 
-**Plug into what already exists (don't re-implement):**
-- **Capture:** `audio.setListening(true/false)`. `SessionRecorder` already logs sessions, and `StrainGuard.observe` already runs on every capture, so strain alerts and the daily cap work in exercises automatically.
-- **Alerts:** `SafetyAlertOverlay` already sits over every tab (`RootTabView`). Respect `strain.restUntil`: while resting, show `RestBanner` and don't auto-start capture.
-- **Live readings:** `audio.pitch`, `audio.resonance` (score 0–100) and `audio.quality`.
+**Read first:** `UI/SettingsView.swift`, `UI/BaselineView.swift`, `App/RootTabView.swift`, `App/VoiceMapperApp.swift`, `Analysis/GoalRange.swift`, `Analysis/ResonanceGoal.swift`, `Analysis/RangeTable.swift` (zone data only).
 
-**Read first:** `UI/ExercisesView.swift`, `UI/LiveView.swift` (capture buttons and rest banner pattern), `UI/SafetyViews.swift`, `Analysis/GoalRange.swift`, `Analysis/StrainGuard.swift` (public API only).
+**Debug helpers:** Debug builds accept `-debugTab <live|range|exercises|history|settings>` and `-debugExercise <id>` as `simctl launch` arguments, for screenshots.
 
-**Wrap-up:** build for the simulator, bump to build 41, archive and upload to TestFlight, open a PR from `claude/s11-exercises`, merge it, then mark S11 done.
-
+**Wrap-up:** build for the simulator, bump to build 42, archive and upload, open a PR from `claude/s12-setup`, merge it, then mark S12 done.

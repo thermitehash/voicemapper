@@ -8,7 +8,23 @@ enum AppTab: Hashable {
 struct RootTabView: View {
     @Environment(StrainGuard.self) private var strain
     @Environment(SessionRecorder.self) private var recorder
-    @State private var selection: AppTab = .live
+    @State private var selection: AppTab = Self.initialTab
+
+    /// Debug builds accept `-debugTab exercises` (etc.) so simulator
+    /// screenshots can open on any tab.
+    private static var initialTab: AppTab {
+        #if DEBUG
+        switch UserDefaults.standard.string(forKey: "debugTab") {
+        case "range": return .range
+        case "exercises": return .exercises
+        case "history": return .history
+        case "settings": return .settings
+        default: return .live
+        }
+        #else
+        return .live
+        #endif
+    }
 
     var body: some View {
         TabView(selection: $selection) {
