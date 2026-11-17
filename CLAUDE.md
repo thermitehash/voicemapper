@@ -3,7 +3,7 @@
 iOS voice-training app (SwiftUI, iOS 17+, Swift 6). Fully local: no network code, analytics, or third-party SDKs.
 Guiding principle: help the user reach *their* voice goal safely — no "correct" voice, strain prevention built in.
 
-Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`.
+Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`.
 
 ## Working rules (Claude Pro budget, spread-out pace)
 - One session = one row of the build table below. Stop at the session boundary.
@@ -50,7 +50,8 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | done |
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | done |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
-| S14 | Buffer | Bug fixes | — | todo |
+| S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | todo |
+| S15 | Buffer | Bug fixes | — | todo |
 
 ## Next session: S13 Polish (Opus for the Praat check, build 43)
 S1–S12 are merged into `main`. TestFlight's latest build is 42 (S12).
