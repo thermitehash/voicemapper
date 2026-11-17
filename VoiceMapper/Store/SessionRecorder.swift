@@ -104,6 +104,21 @@ final class SessionRecorder {
         if session.noisyShare ?? 0 >= Self.noisyPromptShare { noisySession = session }
     }
 
+    /// Settings ▸ Delete all data: drops the open session and every stored
+    /// model. Capture should already be stopped.
+    func deleteAll() {
+        start = nil; hz = []; noisyTicks = 0; scores = []; qualities = []; cells = [:]
+        strain.endSession()
+        noisySession = nil
+        try? context.delete(model: GridCellCount.self)
+        try? context.delete(model: PracticeSession.self)
+        try? context.delete(model: Baseline.self)
+        try? context.save()
+        strain.stopForToday()
+        strain.endRest()
+        strain.setToday(0)
+    }
+
     /// Deletes a saved session (swipe in History, or Delete on the noise prompt).
     func delete(_ session: PracticeSession) {
         if noisySession == session { noisySession = nil }

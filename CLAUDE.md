@@ -29,8 +29,9 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 ## Module layout
 - `AudioEngine` — capture, hear-yourself output, route monitoring + Bluetooth banner
 - `DSP/` — PitchDetector/PitchTracker (YIN), FormantAnalyzer/ResonanceTracker (LPC), VoiceQualityAnalyzer/VoiceQualityTracker (H1–H2, alpha ratio, CPP, HNR, jitter, shimmer, level), NoiseMeter
-- `Analysis/` — NoteMapper, RangeTable, GoalRange, ResonanceGoal, ResonanceScorer, VoicePerception, StrainGuard, HeatmapBinner
-- `UI/` — LiveView, GridView, RangeTableView, HistoryView, HistoryLayers, SafetyViews, BaselineView, HearYourselfSheet, SettingsView, ExercisesView (placeholder); OnboardingView arrives in S12
+- `Analysis/` — NoteMapper, RangeTable, GoalRange, ResonanceGoal, GoalPreset, ResonanceScorer, VoicePerception, StrainGuard, HeatmapBinner
+- `UI/` — LiveView, GridView, RangeTableView, HistoryView, HistoryLayers, SafetyViews, BaselineView, HearYourselfSheet, SettingsView (+ ResearchSourcesView), ExercisesView, ExerciseRunView, OnboardingView, GoalPickerView
+- `App/` — VoiceMapperApp (AppRoot: onboarding vs tabs, lock overlay), RootTabView, AppLock (Face ID / passcode)
 - `Store/` — SwiftData models (sessions, grid-cell counts, baseline, goals)
 
 ## Build sessions
@@ -47,32 +48,21 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S9 | History | History overlay, heat map, Today/Week/Month/All | Overlay + heat map correct | done |
 | S10 | Safety | Weight/health measures, strain alerts, daily cap | Alert fires in strain test | done |
 | S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | done |
-| S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | todo |
+| S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | done |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
 | S14 | Buffer | Bug fixes | — | todo |
 
-## Next session: S12 Setup & settings (Sonnet, build 42)
-S1–S11 are merged into `main`. TestFlight's latest build is 41 (S11).
+## Next session: S13 Polish (Opus for the Praat check, build 43)
+S1–S12 are merged into `main`. TestFlight's latest build is 42 (S12).
 
-**Goal:** first-run onboarding, goal picker, the full Settings list from WIREFRAMES §8, Face ID lock and delete-all.
-- **Onboarding** (first launch only; flag in `@AppStorage`):
-  1. A welcome screen with the guiding principle (no "correct" voice).
-  2. The disclaimer: not a substitute for a speech-language pathologist (PLAN §6).
-  3. Mic permission.
-  4. Goal picker.
-  5. Optional baseline recording (reuse `BaselineView`).
-  6. Wired headphones tip.
-- **Goal picker:** feminine / masculine / androgynous / custom. The presets set both `GoalRange` (`goalLowMidi`/`goalHighMidi`) and `ResonanceGoal` (`goalResonanceLow`/`goalResonanceHigh`). Take the typical ranges from `RangeTable` and `VoicePerception` rather than inventing new numbers. Custom keeps the existing tap-to-set (Range tab) and drag-to-set (grid). Reachable again from Settings.
-- **Settings** (keep the existing Voice + Safety sections):
-  - Goal ▸
-  - Face ID lock toggle: `LocalAuthentication`; lock on launch and on return from background; the usage string is already set.
-  - Delete all data ▸: confirm, then delete every SwiftData model (`PracticeSession`, `GridCellCount`, `Baseline`), clear the app's UserDefaults keys (goal, safety, `exercises.doneToday`, hear-yourself prefs, onboarding flag) and return to onboarding.
-  - Research sources ▸: the PLAN §5 list.
-  - Find a voice therapist ▸: an external link is fine; the app itself makes no network calls.
-- **Skip:** "Save recordings" (the app never stores audio; leave it out or say so) and the colour-blind palette (S13).
+**Goal:** accuracy, accessibility, colour-blind palette, performance.
+- **Praat accuracy check:** compare `PitchDetector` (median F0) and `FormantAnalyzer` (F1–F3) against Praat on a few recorded vowels/sentences (the user records on a Mac and runs Praat; Claude writes a small offline harness or unit test that feeds WAV files through the DSP). Note the differences in docs/ and tune only if clearly off.
+- **Colour-blind palette:** Settings toggle (WIREFRAMES §8) that swaps `PerceivedGender.rgb` (range table, grid zones, heat map, goal dots) for a colour-blind-safe set (e.g. blue / grey-yellow / orange). Text labels (M/A/F) already exist.
+- **Accessibility:** VoiceOver pass over every tab (labels, values, grouping), Dynamic Type at the largest sizes (onboarding, exercises, settings), Reduce Motion for the live dot/trail.
+- **Performance:** Instruments Time Profiler on device while Live runs; keep the audio thread allocation-free; check SwiftUI redraw rate on the grid.
 
-**Read first:** `UI/SettingsView.swift`, `UI/BaselineView.swift`, `App/RootTabView.swift`, `App/VoiceMapperApp.swift`, `Analysis/GoalRange.swift`, `Analysis/ResonanceGoal.swift`, `Analysis/RangeTable.swift` (zone data only).
+**Read first:** `Analysis/RangeTable.swift`, `Analysis/VoicePerception.swift`, `UI/GridView.swift`, `UI/SettingsView.swift`, the DSP files only for the Praat part.
 
-**Debug helpers:** Debug builds accept `-debugTab <live|range|exercises|history|settings>` and `-debugExercise <id>` as `simctl launch` arguments, for screenshots.
+**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`; pass `-onboarding.done YES` to skip onboarding on a fresh simulator install.
 
-**Wrap-up:** build for the simulator, bump to build 42, archive and upload, open a PR from `claude/s12-setup`, merge it, then mark S12 done.
+**Wrap-up:** build for the simulator, bump to build 43, archive and upload, open a PR from `claude/s13-polish`, merge it, then mark S13 done.
