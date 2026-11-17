@@ -42,3 +42,8 @@ Guiding principle: whatever helps the user accomplish their voice goal safely.
 - Formants noisy at high F0 → vowel-guided exercises, median smoothing, confidence gates.
 - Norms vary by person and language → present as typical ranges, not rules.
 - Strain detection is heuristic, not diagnostic → state clearly, point to an SLP.
+
+## Maybe later: version for friends without iPhones
+Not scheduled. Revisit after S16, the real-voice check and the SLP review, so the port uses checked algorithms.
+- **Preferred: web app (PWA), ~5–7 sessions.** Runs in any phone browser, add-to-home-screen, fully local and offline after first load (static hosting, e.g. GitHub Pages). Port DSP + Analysis to TypeScript and port both test suites with the same tolerances. Mic with echo cancellation, noise suppression and auto gain off. Scope: live pitch/resonance, grid, range table, exercises, progression, history, export/backup. Leave out hear-yourself (browser latency) and the Bluetooth banner (not detectable); Face ID lock optional later via passkeys.
+- **Alternatives:** native Android in Kotlin/Compose (~12 sessions; needs an Android phone, $25 Play account, low-latency audio and mic-processing risks); Skip (SwiftUI → Android; audio/DSP/SwiftData still need Android code); lending a used iPhone (SE 2nd gen or later runs iOS 17).
