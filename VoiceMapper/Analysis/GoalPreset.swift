@@ -6,7 +6,8 @@ import Foundation
 /// research as the range table and grid. They're starting points; the user
 /// can fine-tune them on the Range tab and the Live grid.
 enum GoalPreset: String, CaseIterable, Identifiable, Sendable {
-    case feminine, masculine, androgynous
+    /// Alphabetical, so the order doesn't suggest a ranking or a default.
+    case androgynous, feminine, masculine
 
     var id: String { rawValue }
 

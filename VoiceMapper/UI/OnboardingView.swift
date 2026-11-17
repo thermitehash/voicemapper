@@ -7,6 +7,8 @@ struct OnboardingView: View {
     static let doneKey = "onboarding.done"
 
     @Environment(AudioEngine.self) private var audio
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage(Self.doneKey) private var done = false
     @Query private var baselines: [Baseline]
     @State private var step = Self.initialStep
@@ -42,8 +44,9 @@ struct OnboardingView: View {
                 }
             }
             .frame(maxHeight: .infinity)
-            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
-                .combined(with: .opacity))
+            .transition(reduceMotion ? .opacity
+                        : .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
+                            .combined(with: .opacity))
             .id(step)
             controls
         }
@@ -123,16 +126,29 @@ struct OnboardingView: View {
 
     // MARK: - Pieces
 
+    /// Side by side normally; stacked full-width at accessibility text sizes,
+    /// capped so the buttons leave room for the page text.
     private var controls: some View {
-        HStack {
-            if step != .welcome {
-                Button("Back") { move(-1) }
-            }
-            Spacer()
-            Button(nextTitle) { next() }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+        let next = Button { self.next() } label: {
+            Text(nextTitle).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil)
         }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
+        return Group {
+            if typeSize.isAccessibilitySize {
+                VStack(spacing: 8) {
+                    next
+                    if step != .welcome { Button("Back") { move(-1) } }
+                }
+            } else {
+                HStack {
+                    if step != .welcome { Button("Back") { move(-1) } }
+                    Spacer()
+                    next
+                }
+            }
+        }
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .padding()
     }
 

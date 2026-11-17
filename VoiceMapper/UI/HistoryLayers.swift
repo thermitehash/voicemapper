@@ -16,7 +16,7 @@ struct HeatmapLayer: View {
                 guard top > -cellH, top < size.height else { continue }
                 let strength = (c.seconds / maxSeconds).squareRoot()
                 let rect = CGRect(x: Double(c.bin) * cellW, y: top, width: cellW, height: cellH)
-                gc.fill(Path(rect), with: .color(Color.orange.opacity(0.2 + 0.7 * strength)))
+                gc.fill(Path(rect), with: .color(Palette.heat.opacity(0.2 + 0.7 * strength)))
             }
         }
         .allowsHitTesting(false)

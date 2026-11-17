@@ -39,7 +39,7 @@ struct GoalPickerView: View {
                 if isCustom {
                     Text("Tap a note and then another on the Range tab to set your pitch range. Drag on the Live grid to set your resonance target. Your current settings are kept.")
                 }
-                Text("These are typical ranges from voice research, not rules. Any voice can be your goal, and you can change it at any time. Pitch is only part of it: resonance and intonation matter too.")
+                Text("Listed alphabetically. These are typical ranges from voice research, not rules. Any voice can be your goal, and you can change it at any time. Pitch is only part of it: resonance and intonation matter too.")
             }
         }
     }

@@ -3,7 +3,7 @@
 iOS voice-training app (SwiftUI, iOS 17+, Swift 6). Fully local: no network code, analytics, or third-party SDKs.
 Guiding principle: help the user reach *their* voice goal safely — no "correct" voice, strain prevention built in.
 
-Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`.
+Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`. DSP accuracy results: `docs/ACCURACY.md` (re-run with `Tools/DSPCheck/run.sh` after any DSP change).
 
 ## Working rules (Claude Pro budget, spread-out pace)
 - One session = one row of the build table below. Stop at the session boundary.
@@ -49,21 +49,28 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S10 | Safety | Weight/health measures, strain alerts, daily cap | Alert fires in strain test | done |
 | S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | done |
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | done |
-| S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | todo |
+| S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | done |
 | S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | todo |
 | S15 | Buffer | Bug fixes | — | todo |
 
-## Next session: S13 Polish (Opus for the Praat check, build 43)
-S1–S12 are merged into `main`. TestFlight's latest build is 42 (S12).
+## Next session: S14 Progression (Opus, build 44)
+S1–S13 are merged into `main`. TestFlight's latest build is 43 (S13).
 
-**Goal:** accuracy, accessibility, colour-blind palette, performance.
-- **Praat accuracy check:** compare `PitchDetector` (median F0) and `FormantAnalyzer` (F1–F3) against Praat on a few recorded vowels/sentences (the user records on a Mac and runs Praat; Claude writes a small offline harness or unit test that feeds WAV files through the DSP). Note the differences in docs/ and tune only if clearly off.
-- **Colour-blind palette:** Settings toggle (WIREFRAMES §8) that swaps `PerceivedGender.rgb` (range table, grid zones, heat map, goal dots) for a colour-blind-safe set (e.g. blue / grey-yellow / orange). Text labels (M/A/F) already exist.
-- **Accessibility:** VoiceOver pass over every tab (labels, values, grouping), Dynamic Type at the largest sizes (onboarding, exercises, settings), Reduce Motion for the live dot/trail.
-- **Performance:** Instruments Time Profiler on device while Live runs; keep the audio thread allocation-free; check SwiftUI redraw rate on the grid.
+**Goal:** the long arc from new learner to fine tuner. The full design is in `docs/PROGRESSION.md`; build what it describes:
+- `ExerciseResult` SwiftData model (add to the `ModelContainer` and to `SessionRecorder.deleteAll()`); record one result when each exercise finishes (`ExerciseRunView.finish()`).
+- Stages 1–6 with suggested (never forced) criteria computed from `PracticeSession`, `GridCellCount`, `ExerciseResult` and strain history, with minimum days per stage. Strain alerts hold the stage.
+- Exercises tab: a path header (stages, current one, "ready to move on" checks in plain words) and a **Today's plan** card (warm-up → 2–3 stage exercises → 1 review → cool-down, sized to the daily cap), with the full library below.
+- Stage 2 stepped hold target: start at the baseline and move 1 semitone towards the goal per passed step.
+- `Exercise.stages`, plus a few new exercises for stages 4–6 (phrases, intonation, lighter ↔ heavier weight). Keep the instructions goal-neutral.
+- Settings ▸ Goal shows the current stage and has "Choose stage". Stage keys are cleared by Delete all data (it already wipes the whole UserDefaults domain).
 
-**Read first:** `Analysis/RangeTable.swift`, `Analysis/VoicePerception.swift`, `UI/GridView.swift`, `UI/SettingsView.swift`, the DSP files only for the Praat part.
+**Read first:** `docs/PROGRESSION.md`, `Analysis/Exercises.swift`, `UI/ExercisesView.swift`, `UI/ExerciseRunView.swift`, `Store/Models.swift`, `Store/SessionRecorder.swift`.
 
-**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`; pass `-onboarding.done YES` to skip onboarding on a fresh simulator install.
+**Notes from S13:**
+- Goal presets are listed alphabetically on purpose, so the order doesn't read as a ranking. Keep any new gender-related lists the same way.
+- The colour-blind palette is `Palette.colourBlind` (cached static, synced in RootTabView).
+- Performance profiling on device (Instruments) is still open; do it in S15 if anything feels slow.
 
-**Wrap-up:** build for the simulator, bump to build 43, archive and upload, open a PR from `claude/s13-polish`, merge it, then mark S13 done.
+**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`.
+
+**Wrap-up:** build for the simulator, bump to build 44, archive and upload, open a PR from `claude/s14-progression`, merge it, then mark S14 done.

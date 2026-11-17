@@ -35,7 +35,21 @@ enum ResonanceScorer {
     /// low or too wide for the next formant number is passed over rather than
     /// shifting every number up; one that is too high ends the search.
     static func spacing(of formants: [FormantAnalyzer.Formant]) -> Double? {
-        guard formants.count >= 3 else { return nil }
+        let used = assigned(formants)
+        guard used.count >= 3 else { return nil }
+
+        var numerator = 0.0, denominator = 0.0
+        for (i, f) in used.enumerated() {
+            let k = Double(2 * i + 1) / 2
+            numerator += k * f
+            denominator += k * k
+        }
+        return numerator / denominator
+    }
+
+    /// The peaks taken as F1, F2, F3 (and F4), in order; see `spacing(of:)`.
+    static func assigned(_ formants: [FormantAnalyzer.Formant]) -> [Double] {
+        guard formants.count >= 3 else { return [] }
         var used: [Double] = []
         for formant in formants {
             let slot = used.count
@@ -47,15 +61,7 @@ enum ResonanceScorer {
             guard f <= ranges[slot].upperBound else { break }
             used.append(f)
         }
-        guard used.count >= 3 else { return nil }
-
-        var numerator = 0.0, denominator = 0.0
-        for (i, f) in used.enumerated() {
-            let k = Double(2 * i + 1) / 2
-            numerator += k * f
-            denominator += k * k
-        }
-        return numerator / denominator
+        return used
     }
 
     /// 0 (darkest) … 100 (brightest).

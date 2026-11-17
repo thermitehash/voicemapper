@@ -9,6 +9,7 @@ struct RootTabView: View {
     @Environment(StrainGuard.self) private var strain
     @Environment(SessionRecorder.self) private var recorder
     @State private var selection: AppTab = Self.initialTab
+    @AppStorage(Palette.key) private var colourBlind = false
 
     /// Debug builds accept `-debugTab exercises` (etc.) so simulator
     /// screenshots can open on any tab.
@@ -48,6 +49,8 @@ struct RootTabView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }
                 .tag(AppTab.settings)
         }
+        .id(colourBlind)  // zone colours are cached; rebuild the tabs on change
+        .onChange(of: colourBlind, initial: true) { _, on in Palette.colourBlind = on }
         .overlay { SafetyAlertOverlay() }
         .alert("Keep this session?", isPresented: noisyPromptShown, presenting: recorder.noisySession) { session in
             Button("Keep") { recorder.noisySession = nil }
