@@ -51,7 +51,12 @@ final class SessionRecorder {
         if start == nil { begin() }
         // Noise skews the quality measures, so they're left out while noisy.
         let quality = audio.isNoisy ? nil : audio.quality
+        let hadAlert = strain.alert != nil
         strain.observe(tick: Self.tick, pitch: audio.pitch?.frequency, quality: quality, noisy: audio.isNoisy)
+        if !hadAlert, case .strain = strain.alert {
+            context.insert(StrainEvent(date: .now))
+            try? context.save()
+        }
         guard let pitch = audio.pitch else { return }
         hz.append(pitch.frequency)
         if audio.isNoisy { noisyTicks += 1 }
@@ -113,6 +118,8 @@ final class SessionRecorder {
         try? context.delete(model: GridCellCount.self)
         try? context.delete(model: PracticeSession.self)
         try? context.delete(model: Baseline.self)
+        try? context.delete(model: ExerciseResult.self)
+        try? context.delete(model: StrainEvent.self)
         try? context.save()
         strain.stopForToday()
         strain.endRest()

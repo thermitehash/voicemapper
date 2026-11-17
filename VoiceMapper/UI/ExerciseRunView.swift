@@ -10,9 +10,12 @@ struct ExerciseRunView: View {
     @Environment(AudioEngine.self) private var audio
     @Environment(StrainGuard.self) private var strain
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var context
     @AppStorage(ExerciseLog.key) private var log = ""
     @AppStorage(GoalRange.lowKey) private var goalLow = 0
     @AppStorage(GoalRange.highKey) private var goalHigh = 0
+    @AppStorage(Progression.stageKey) private var stage = 1
+    @AppStorage(Progression.holdStepKey) private var holdStep = 0
     @Query private var baselines: [Baseline]
 
     @State private var startedCapture = false
@@ -28,6 +31,11 @@ struct ExerciseRunView: View {
     @State private var pauseLeft = 0.0
     // Reading
     @State private var readSeconds = 0.0
+    // Result measures (S14)
+    @State private var pitchSamples: [Double] = []
+    @State private var resonanceSamples: [Double] = []
+    @State private var strainAlerts = 0
+    @State private var nextStepMessage: String?
 
     private static let tick = 0.1
     /// Off-target time (breath, wobble) before a hold restarts.
@@ -49,6 +57,7 @@ struct ExerciseRunView: View {
                 } else {
                     readout
                     content
+                    BasisView(basis: exercise.basis)
                 }
             }
             .padding()
@@ -67,6 +76,9 @@ struct ExerciseRunView: View {
                 try? await Task.sleep(for: .seconds(Self.tick))
                 if running { advance(Self.tick) }
             }
+        }
+        .onChange(of: strain.alert) { old, new in
+            if running, old == nil, case .strain = new { strainAlerts += 1 }
         }
         .onDisappear {
             if startedCapture { Task { await audio.setListening(false) } }
@@ -166,7 +178,13 @@ struct ExerciseRunView: View {
                 .font(.subheadline)
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
-            Text("Counts while you stay within a semitone. Comfortable volume. If it feels tight, pick a lower target.")
+            if isSteppedHold {
+                Text("Stage 2 steps: this target moves 1 semitone towards your goal after you pass it on \(Progression.passesPerStep) separate days.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            Text("Counts while you stay within a semitone. Comfortable volume. If it feels tight, pick an easier target.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -207,6 +225,14 @@ struct ExerciseRunView: View {
                 .font(.system(size: 64))
                 .foregroundStyle(.green)
             Text("Done").font(.title2.weight(.semibold))
+            if let nextStepMessage {
+                Text(nextStepMessage).multilineTextAlignment(.center)
+            }
+            if strainAlerts > 0 {
+                Text("There was a strain alert during this exercise, so it won't count towards moving on. Rest your voice before trying again.")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+            }
             if exercise.isCoolDown {
                 Text("Nice work today. Rest your voice and drink some water.")
                     .multilineTextAlignment(.center)
@@ -223,8 +249,18 @@ struct ExerciseRunView: View {
 
     // MARK: - Logic
 
-    /// Middle of the goal range, else the baseline median, else A3.
+    private var isSteppedHold: Bool {
+        if case .hold = exercise.kind { return Progression.stage(stored: stage) == .pitch }
+        return false
+    }
+
+    /// Stage 2: the current hold step. Otherwise the middle of the goal range,
+    /// else the baseline median, else A3.
     private var defaultTarget: Int {
+        if isSteppedHold {
+            return Progression.currentHoldStep(stored: holdStep, goal: GoalRange(low: goalLow, high: goalHigh),
+                                               baselineHz: baselines.first?.medianHz)
+        }
         if let goal = GoalRange(low: goalLow, high: goalHigh) {
             return (goal.low + goal.high) / 2
         }
@@ -243,6 +279,10 @@ struct ExerciseRunView: View {
     }
 
     private func advance(_ dt: Double) {
+        if let pitch = audio.pitch {
+            pitchSamples.append(pitch.frequency)
+            if let r = audio.resonance { resonanceSamples.append(r.score) }
+        }
         switch exercise.kind {
         case .guided(let steps):
             stepElapsed += dt
@@ -298,9 +338,84 @@ struct ExerciseRunView: View {
     private func finish() {
         finished = true
         log = ExerciseLog.marking(exercise.id, in: log)
+        record()
         if startedCapture {
             startedCapture = false
             Task { await audio.setListening(false) }
+        }
+    }
+    /// Saves an `ExerciseResult` and, for a passed stage 2 hold, moves the step on.
+    private func record() {
+        var isHold = false
+        if case .hold = exercise.kind { isHold = true }
+        let result = ExerciseResult(
+            date: .now, exerciseID: exercise.id, stage: stage, passed: strainAlerts == 0,
+            voicedSeconds: Double(pitchSamples.count) * Self.tick, strainAlerts: strainAlerts)
+        result.targetMidi = isHold ? targetMidi : nil
+        result.medianHz = median(pitchSamples)
+        if let lo = percentile(pitchSamples, 0.1), let hi = percentile(pitchSamples, 0.9) {
+            result.semitoneRange = Note.midiValue(frequency: hi) - Note.midiValue(frequency: lo)
+        }
+        result.medianResonance = median(resonanceSamples)
+        context.insert(result)
+        try? context.save()
+
+        guard isSteppedHold, result.passed else { return }
+        let results = (try? context.fetch(FetchDescriptor<ExerciseResult>(
+            predicate: #Predicate { $0.exerciseID == "hold" }))) ?? []
+        let startStamp = UserDefaults.standard.double(forKey: Progression.stageStartKey)
+        let input = Progression.Input(
+            stage: .pitch, stageStart: startStamp > 0 ? Date(timeIntervalSince1970: startStamp) : nil,
+            sessions: [], results: results, strainDates: [], baselineHz: baselines.first?.medianHz,
+            goal: GoalRange(low: goalLow, high: goalHigh), resonanceGoal: nil,
+            holdStep: holdStep, capMinutes: strain.capMinutes)
+        let current = Progression.currentHoldStep(stored: holdStep, goal: input.goal, baselineHz: input.baselineHz)
+        let next = Progression.nextHoldStep(input)
+        holdStep = next
+        nextStepMessage = next != current ? "Step passed. Your next hold target is \(Note(midi: next).name)." : nil
+    }
+}
+
+/// "Why this exercise": the evidence behind it (S14 evidence review).
+private struct BasisView: View {
+    let basis: Exercise.Basis
+
+    var body: some View {
+        DisclosureGroup {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(basis.summary)
+                    .font(.subheadline)
+                ForEach(basis.citations, id: \.self) { citation in
+                    Text(citation)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Text("Keep to a comfortable volume, and stop if anything hurts or feels scratchy.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 6)
+        } label: {
+            HStack {
+                Text("Why this exercise")
+                Spacer()
+                Text(basis.strength.label)
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(strengthColor.opacity(0.15), in: Capsule())
+            }
+        }
+        .padding(12)
+        .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var strengthColor: Color {
+        switch basis.strength {
+        case .research: .green
+        case .clinical: .blue
+        case .limited: .orange
         }
     }
 }

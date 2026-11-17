@@ -87,6 +87,43 @@ final class Baseline {
     }
 }
 
+/// One finished exercise (S14). Feeds the progression criteria; unlike
+/// `ExerciseLog` it keeps every day. Only summaries, never audio.
+@Model
+final class ExerciseResult {
+    var date: Date
+    var exerciseID: String
+    /// Progression stage the user was in when it was done.
+    var stage: Int
+    /// Completed with no strain alert during it.
+    var passed: Bool
+    /// Seconds with a voiced pitch reading while it ran.
+    var voicedSeconds: Double
+    var strainAlerts: Int
+    /// Hold drill target (MIDI); nil for other exercises.
+    var targetMidi: Int?
+    var medianHz: Double?
+    /// p10–p90 pitch spread in semitones (intonation measure, PLAN §5).
+    var semitoneRange: Double?
+    var medianResonance: Double?
+
+    init(date: Date, exerciseID: String, stage: Int, passed: Bool, voicedSeconds: Double, strainAlerts: Int) {
+        self.date = date
+        self.exerciseID = exerciseID
+        self.stage = stage
+        self.passed = passed
+        self.voicedSeconds = voicedSeconds
+        self.strainAlerts = strainAlerts
+    }
+}
+
+/// When a strain alert fired (S14). Strain holds the progression stage in place.
+@Model
+final class StrainEvent {
+    var date: Date
+    init(date: Date) { self.date = date }
+}
+
 func median(_ values: [Double]) -> Double? {
     guard !values.isEmpty else { return nil }
     let s = values.sorted()
