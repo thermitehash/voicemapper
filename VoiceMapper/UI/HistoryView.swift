@@ -5,6 +5,7 @@ import Charts
 struct HistoryView: View {
     @Environment(SessionRecorder.self) private var recorder
     @Query(sort: \PracticeSession.start, order: .reverse) private var allSessions: [PracticeSession]
+    @Query(sort: \ExerciseResult.date) private var results: [ExerciseResult]
     @AppStorage("historyPeriod") private var periodRaw = HistoryPeriod.week.rawValue
 
     private var period: HistoryPeriod { HistoryPeriod(rawValue: periodRaw) ?? .week }
@@ -12,6 +13,7 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             let sessions = HeatmapBinner.sessions(allSessions, in: period)
+            let markers = stageMarkers(for: sessions)
             // A List (not a ScrollView) so session rows can be swiped to delete.
             List {
                 Group {
@@ -28,8 +30,9 @@ struct HistoryView: View {
                                                     : "Nothing recorded in this period. Try a longer one."))
                     } else {
                         heatMap(sessions)
-                        chart("Median pitch (Hz)", sessions: sessions) { $0.medianHz }
-                        chart("Resonance score", sessions: sessions.filter { $0.medianResonance != nil }) { $0.medianResonance ?? 0 }
+                        chart("Median pitch (Hz)", sessions: sessions, markers: markers) { $0.medianHz }
+                        chart("Resonance score", sessions: sessions.filter { $0.medianResonance != nil },
+                              markers: markers) { $0.medianResonance ?? 0 }
                         weightChart(sessions.filter { $0.quality != nil })
                     }
                 }
@@ -65,20 +68,41 @@ struct HistoryView: View {
         }
     }
 
-    private func chart(_ title: String, sessions: [PracticeSession],
+    /// Stage changes inside the charts' date span (docs/PROGRESSION.md).
+    private func stageMarkers(for sessions: [PracticeSession]) -> [Progression.StageChange] {
+        guard let first = sessions.map(\.start).min(), let last = sessions.map(\.start).max() else { return [] }
+        return Progression.stageChanges(results).filter { $0.date >= first && $0.date <= last }
+    }
+
+    private func chart(_ title: String, sessions: [PracticeSession], markers: [Progression.StageChange] = [],
                        value: @escaping (PracticeSession) -> Double) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.headline)
             if sessions.count < 2 {
                 Text("Needs at least two sessions.").font(.caption).foregroundStyle(.secondary)
             } else {
-                Chart(sessions.sorted { $0.start < $1.start }, id: \.start) { s in
-                    LineMark(x: .value("Date", s.start), y: .value(title, value(s)))
-                        .interpolationMethod(.monotone)
-                    PointMark(x: .value("Date", s.start), y: .value(title, value(s)))
+                Chart {
+                    ForEach(sessions.sorted { $0.start < $1.start }, id: \.start) { s in
+                        LineMark(x: .value("Date", s.start), y: .value(title, value(s)))
+                            .interpolationMethod(.monotone)
+                        PointMark(x: .value("Date", s.start), y: .value(title, value(s)))
+                    }
+                    ForEach(markers) { m in
+                        RuleMark(x: .value("Stage", m.date))
+                            .foregroundStyle(.secondary.opacity(0.6))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                            .annotation(position: .top, alignment: .leading) {
+                                Text("Stage \(m.stage.rawValue)").font(.caption2).foregroundStyle(.secondary)
+                            }
+                            .accessibilityLabel("Moved to stage \(m.stage.rawValue), \(m.stage.title)")
+                    }
                 }
                 .chartYScale(domain: .automatic(includesZero: false))
                 .frame(height: 140)
+                if !markers.isEmpty {
+                    Text("Dashed lines mark when you moved to a new stage.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
         }
     }

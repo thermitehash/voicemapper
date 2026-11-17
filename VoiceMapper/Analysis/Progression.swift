@@ -117,7 +117,7 @@ enum Progression {
         switch i.stage {
         case .foundations:
             list.append(.init(text: "Practised on \(min(days.count, 5)) of 5 days", met: days.count >= 5))
-            let warmDays = dayCount(i, results: i.results.filter { $0.exerciseID == Exercise.warmUpID && within(i, $0.date) })
+            let warmDays = dayCount(i, results: i.results.filter { $0.exerciseID == Exercise.warmUpID && $0.passed && within(i, $0.date) })
             let most = days.count > 0 && Double(warmDays) >= Double(days.count) * 0.6
             list.append(.init(text: days.isEmpty ? "Warm-up on most practice days"
                               : "Warm-up on most practice days (\(warmDays) of \(days.count))",
@@ -164,7 +164,7 @@ enum Progression {
 
         case .speech:
             list.append(minimumDays(i, days))
-            let readings = i.results.filter { $0.exerciseID == Exercise.readingID && within(i, $0.date) }
+            let readings = i.results.filter { $0.exerciseID == Exercise.readingID && $0.passed && within(i, $0.date) }
             if let goal = i.goal {
                 let inGoal = readings.filter { r in r.medianHz.map { goal.contains(midi: Note(frequency: $0).midi) } ?? false }
                 let n = dayCount(i, results: inGoal)
@@ -246,7 +246,7 @@ enum Progression {
     static func practiceDays(_ i: Input, since: Date?) -> Set<Date> {
         let from = since.map { i.calendar.startOfDay(for: $0) } ?? .distantPast
         var days = Set(i.sessions.filter { $0.start >= from }.map { i.calendar.startOfDay(for: $0.start) })
-        days.formUnion(i.results.filter { $0.date >= from }.map { i.calendar.startOfDay(for: $0.date) })
+        days.formUnion(i.results.filter { $0.passed && $0.date >= from }.map { i.calendar.startOfDay(for: $0.date) })
         return days
     }
 
@@ -296,6 +296,29 @@ enum Progression {
     private static func inBand(_ bin: Int, _ band: ResonanceGoal) -> Bool {
         let centre = (Double(bin) + 0.5) * GridCellCount.resonanceBinWidth
         return centre >= band.low && centre <= band.high
+    }
+
+    // MARK: - History markers
+
+    struct StageChange: Identifiable, Equatable {
+        let date: Date
+        let stage: Stage
+        var id: Date { date }
+    }
+
+    /// When the user moved into each stage, read from the stage saved on each
+    /// exercise result (History's stage markers). Starts from stage 1.
+    static func stageChanges(_ results: [ExerciseResult]) -> [StageChange] {
+        var changes: [StageChange] = []
+        var current = Stage.foundations
+        for r in results.sorted(by: { $0.date < $1.date }) {
+            let s = stage(stored: r.stage)
+            if s != current {
+                changes.append(StageChange(date: r.date, stage: s))
+                current = s
+            }
+        }
+        return changes
     }
 
     // MARK: - Today's plan
