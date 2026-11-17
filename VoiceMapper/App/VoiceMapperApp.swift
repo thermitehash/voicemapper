@@ -7,6 +7,7 @@ struct VoiceMapperApp: App {
     private let container: ModelContainer
     @State private var recorder: SessionRecorder
     @State private var strain: StrainGuard
+    @State private var lock = AppLock()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -21,15 +22,53 @@ struct VoiceMapperApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
+            AppRoot()
                 .environment(audio)
                 .environment(strain)
                 .environment(recorder)
+                .environment(lock)
                 .task { recorder.run() }
         }
         .modelContainer(container)
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background { recorder.finish() }
+            if phase == .background {
+                recorder.finish()
+                lock.lockIfEnabled()
+            }
+        }
+    }
+}
+
+/// Onboarding until it's finished, then the tabs; the Face ID lock covers both.
+private struct AppRoot: View {
+    @AppStorage(OnboardingView.doneKey) private var onboarded = false
+    @Environment(AppLock.self) private var lock
+    @Environment(AudioEngine.self) private var audio
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        ZStack {
+            if onboarded {
+                RootTabView()
+            } else {
+                OnboardingView()
+            }
+            if lock.isLocked {
+                LockScreen().transition(.opacity)
+            }
+        }
+        .animation(.default, value: onboarded)
+        .animation(.default, value: lock.isLocked)
+        .onChange(of: lock.isLocked) { _, locked in
+            if locked {
+                Task {
+                    await audio.setHearYourself(false)
+                    await audio.setListening(false)
+                }
+            }
+        }
+        .task(id: scenePhase) {
+            if scenePhase == .active { await lock.unlock() }
         }
     }
 }

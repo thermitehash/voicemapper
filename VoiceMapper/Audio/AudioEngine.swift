@@ -413,6 +413,18 @@ final class AudioEngine {
 
     // MARK: - Permission
 
+    /// Settings ▸ Delete all data: back to the default hear-yourself settings.
+    func resetPreferences() {
+        voiceLevels = [:]
+        voiceLevel = Self.defaultVoiceLevel
+        delayMs = 0
+        if selectedMicrophoneID != nil { selectedMicrophoneID = nil }
+    }
+
+    /// Asks for mic access without starting capture (onboarding).
+    @discardableResult
+    func requestMicAccess() async -> Bool { await requestMicPermission() }
+
     private func requestMicPermission() async -> Bool {
         if micPermission == .undetermined {
             let granted = await AVAudioApplication.requestRecordPermission()
