@@ -1,5 +1,14 @@
 # Progression: new learner → fine tuner (S14)
 
+> **Status:** built in S14 (build 44), with fixes in S16 (build 46).
+> - The code is in `Analysis/Progression.swift`, and the exercise evidence review is in `docs/EXERCISE_EVIDENCE.md`.
+> - History stage markers were added in S16.
+> - **Deviations from the plan below:**
+>   - Stage 2 steps move after 2 separate passing days per step.
+>   - Stage 5 intonation uses an exercise count, not a semitone target, because the evidence is mixed.
+>   - "Big dog / small dog" became "Resonance: forward ↔ back".
+>   - An exercise counts only with real voiced time.
+
 Today the Exercises tab is a flat daily list. Real voice training moves through stages over weeks and months. This plan adds that long arc, built on data the app already records, without making any voice "correct" or pushing faster than is safe.
 
 ## Principles
