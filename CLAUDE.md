@@ -50,45 +50,24 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S11 | Exercises | Exercise list, warm-up, cool-down, target-hold drill | Exercises completable | done |
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | done |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | done |
-| S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | todo |
+| S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | done |
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | todo |
 | S16 | Buffer | Bug fixes | — | todo |
 
-## Next session: S14 Progression (Opus, build 44)
-S1–S13 are merged into `main`. TestFlight's latest build is 43 (S13).
+## Next session: S15 Verification (Opus, build 45)
+S1–S14 are merged into `main`. TestFlight's latest build is 44 (S14).
 
-**Goal:** the long arc from new learner to fine tuner. The full design is in `docs/PROGRESSION.md`; build what it describes:
-- `ExerciseResult` SwiftData model (add to the `ModelContainer` and to `SessionRecorder.deleteAll()`); record one result when each exercise finishes (`ExerciseRunView.finish()`).
-- Stages 1–6 with suggested (never forced) criteria computed from `PracticeSession`, `GridCellCount`, `ExerciseResult` and strain history, with minimum days per stage. Strain alerts hold the stage.
-- Exercises tab: a path header (stages, current one, "ready to move on" checks in plain words) and a **Today's plan** card (warm-up → 2–3 stage exercises → 1 review → cool-down, sized to the daily cap), with the full library below.
-- Stage 2 stepped hold target: start at the baseline and move 1 semitone towards the goal per passed step.
-- `Exercise.stages`, plus a few new exercises for stages 4–6 (phrases, intonation, lighter ↔ heavier weight). Keep the instructions goal-neutral.
-- Settings ▸ Goal shows the current stage and has "Choose stage". Stage keys are cleared by Delete all data (it already wipes the whole UserDefaults domain).
+**Notes from S14:**
+- The exercise evidence review is in `docs/EXERCISE_EVIDENCE.md`. Each `Exercise` has a `basis` (strength, summary, citations) shown under "Why this exercise". "Big dog / small dog" was replaced by "Resonance: forward ↔ back" (Carew et al. 2007). Lighter ↔ heavier and Cool-down are labelled "Limited research".
+- The user still needs an SLP to review the final list. Don't call the app "SLP-approved" until one has.
+- The progression logic is pure and testable in `Analysis/Progression.swift` (criteria, hold steps, `plan`). Add it to the S15 mapping-layer tests: hold step stepping, safety hold, and plan trimming to the cap.
+- New SwiftData models are `ExerciseResult` and `StrainEvent` (inserted by `SessionRecorder` when a strain alert fires).
+- The stage keys are `progression.stage`, `progression.stageStart` and `progression.holdStep`.
+- History stage markers (PROGRESSION.md) aren't built yet. They're for S16.
+- Carried over from S13: profile performance on device with Instruments if anything feels slow. Keep gender-related lists alphabetical.
+- Debug exercise ids: warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown.
 
-**First: evidence review of every exercise** (user request). Each exercise must rest on published voice research or recognised speech-language pathology practice, not internet folklore:
-- Add a `basis` (citation + one line) to `Exercise` and show it in the run view ("Why this exercise").
-- Starting points to check against:
-  - Titze 2006 (semi-occluded vocal tract exercises: lip/tongue trills, straw, humming; JSLHR 49:448–459)
-  - Stemple et al. 1994 (Vocal Function Exercises: sustained vowels, glides; J Voice)
-  - Verdolini's resonant voice therapy
-  - Davies, Papp & Antoni 2015 (gender-affirming voice and communication guidelines; Int J Transgenderism 16:117–159)
-  - Hancock & Garabedian 2013 (transgender voice therapy outcomes)
-- Read the sources for real; don't cite from memory without checking the claim.
-- Flag anything without published support. "Big dog / small dog" in particular comes from community voice training: either reframe it as forward/back resonance work that Davies et al. 2015 describes, or label it as a community technique.
-- Same standard for the new stage 4–6 exercises.
-- Keep the exact wording safe: comfortable volume, stop if it hurts.
-- The app can't claim to be "SLP-approved" unless an SLP actually reviews it. Suggest to the user that they ask one to look at the final list.
-
-**Read first:** `docs/PROGRESSION.md`, `Analysis/Exercises.swift`, `UI/ExercisesView.swift`, `UI/ExerciseRunView.swift`, `Store/Models.swift`, `Store/SessionRecorder.swift`.
-
-**Notes from S13:**
-- Goal presets are listed alphabetically on purpose, so the order doesn't read as a ranking. Keep any new gender-related lists the same way.
-- The colour-blind palette is `Palette.colourBlind` (cached static, synced in RootTabView).
-- Performance profiling on device (Instruments) is still open; do it in S15 if anything feels slow.
-
-**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`.
-
-**Queued for S15 Verification (user request):** tests that measure mapping accuracy, not just run the code.
+**S15 scope (user request):** tests that measure mapping accuracy, not just run the code.
 - **Test target:** add an XCTest unit-test target (in Xcode: File ▸ New ▸ Target ▸ Unit Testing Bundle; the user may need to click through it), or failing that, give `Tools/DSPCheck` a `--test` mode that exits non-zero.
 - **DSP tolerances,** turning the `docs/ACCURACY.md` tables into assertions:
   - F0 within 5 cents and no octave errors from 65 to 400 Hz across vowels;
@@ -113,4 +92,6 @@ S1–S13 are merged into `main`. TestFlight's latest build is 43 (S13).
   4. The tests assert the app is within tolerance.
 - **Wrap-up:** record the results in `docs/ACCURACY.md`.
 
-**Wrap-up:** build for the simulator, bump to build 44, archive and upload, open a PR from `claude/s14-progression`, merge it, then mark S14 done.
+**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
+
+**Wrap-up:** build for the simulator, bump to build 45, archive and upload, open a PR from `claude/s15-verification`, merge it, then mark S15 done.

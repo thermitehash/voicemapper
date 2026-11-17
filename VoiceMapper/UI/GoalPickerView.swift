@@ -64,8 +64,17 @@ struct GoalPickerView: View {
 
 /// Settings ▸ Goal.
 struct GoalSettingsView: View {
+    @AppStorage(Progression.stageKey) private var stage = 1
+
     var body: some View {
-        List { GoalPickerView() }
+        List {
+            GoalPickerView()
+            Section("Progression") {
+                let current = Progression.stage(stored: stage)
+                LabeledContent("Current stage", value: "\(current.rawValue). \(current.title)")
+                NavigationLink("Choose stage") { StagePickerView() }
+            }
+        }
             .navigationTitle("Goal")
             .navigationBarTitleDisplayMode(.inline)
     }

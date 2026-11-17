@@ -11,7 +11,8 @@ struct VoiceMapperApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
-        let container = try! ModelContainer(for: PracticeSession.self, GridCellCount.self, Baseline.self)
+        let container = try! ModelContainer(for: PracticeSession.self, GridCellCount.self, Baseline.self,
+                                               ExerciseResult.self, StrainEvent.self)
         let audio = AudioEngine()
         self.container = container
         _audio = State(initialValue: audio)
