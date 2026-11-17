@@ -3,7 +3,7 @@
 iOS voice-training app (SwiftUI, iOS 17+, Swift 6). Fully local: no network code, analytics, or third-party SDKs.
 Guiding principle: help the user reach *their* voice goal safely — no "correct" voice, strain prevention built in.
 
-Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`. DSP accuracy results: `docs/ACCURACY.md` (re-run with `Tools/DSPCheck/run.sh` after any DSP change).
+Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`. DSP accuracy results: `docs/ACCURACY.md`. After any DSP or mapping change, run `Tools/DSPCheck/run.sh --test` and `Tools/MappingTests/run.sh`; both must exit 0.
 
 ## Working rules (Claude Pro budget, spread-out pace)
 - One session = one row of the build table below. Stop at the session boundary.
@@ -51,47 +51,26 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S12 | Setup & settings | Onboarding, goal picker, settings, Face ID, delete all | Clean install end to end | done |
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | done |
 | S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | done |
-| S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | todo |
+| S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
 | S16 | Buffer | Bug fixes | — | todo |
 
-## Next session: S15 Verification (Opus, build 45)
-S1–S14 are merged into `main`. TestFlight's latest build is 44 (S14).
+## Next session: S16 Buffer (Sonnet, build 46)
+S1–S15 are merged into `main`. TestFlight's latest build is 45 (S15).
 
-**Notes from S14:**
-- The exercise evidence review is in `docs/EXERCISE_EVIDENCE.md`. Each `Exercise` has a `basis` (strength, summary, citations) shown under "Why this exercise". "Big dog / small dog" was replaced by "Resonance: forward ↔ back" (Carew et al. 2007). Lighter ↔ heavier and Cool-down are labelled "Limited research".
-- The user still needs an SLP to review the final list. Don't call the app "SLP-approved" until one has.
-- The progression logic is pure and testable in `Analysis/Progression.swift` (criteria, hold steps, `plan`). Add it to the S15 mapping-layer tests: hold step stepping, safety hold, and plan trimming to the cap.
-- New SwiftData models are `ExerciseResult` and `StrainEvent` (inserted by `SessionRecorder` when a strain alert fires).
-- The stage keys are `progression.stage`, `progression.stageStart` and `progression.holdStep`.
-- History stage markers (PROGRESSION.md) aren't built yet. They're for S16.
-- Carried over from S13: profile performance on device with Instruments if anything feels slow. Keep gender-related lists alphabetical.
-- Debug exercise ids: warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown.
+**Open items:**
+- **Real-voice reference set:** the user records the WAVs listed in `Tools/DSPCheck/reference/README.md`, measures them with `measure.praat`, and runs `Tools/DSPCheck/run.sh --test`. Record the result in `docs/ACCURACY.md`. The WAVs are git-ignored; only `reference.json` is committed.
+- **Device test of the S15 pitch fix:** check high "ah" sirens (370–480 Hz) and normal speech. Rough or creaky voice must not read an octave low.
+- **History stage markers** (docs/PROGRESSION.md), not built in S14.
+- **SLP review** of `docs/EXERCISE_EVIDENCE.md`. Don't call the app "SLP-approved" until one has.
+- **Performance:** profile with Instruments on device if anything feels slow.
+- **XCTest target:** optional, if the user wants tests in Xcode. The command-line suites already cover the scope.
 
-**S15 scope (user request):** tests that measure mapping accuracy, not just run the code.
-- **Test target:** add an XCTest unit-test target (in Xcode: File ▸ New ▸ Target ▸ Unit Testing Bundle; the user may need to click through it), or failing that, give `Tools/DSPCheck` a `--test` mode that exits non-zero.
-- **DSP tolerances,** turning the `docs/ACCURACY.md` tables into assertions:
-  - F0 within 5 cents and no octave errors from 65 to 400 Hz across vowels;
-  - F1–F3 within 10%;
-  - ΔF within 3%;
-  - resonance score within 5 points for front and open vowels;
-  - no resonance reading above 350 Hz.
-- **Mapping layer:**
-  - `Note` Hz↔MIDI↔name round trips (A4 = 440, C4 = 261.63);
-  - `PerceivedGender` zone boundaries (145 / 175 Hz);
-  - `GoalPreset` ranges stay inside their zones;
-  - `ResonanceScorer.score` endpoints;
-  - `GridCellCount.bin` edges;
-  - `HeatmapBinner` totals;
-  - `GoalRange.closeness` and `direction`;
-  - `StrainGuard` rules on scripted inputs;
-  - `ExerciseLog` day rollover.
-- **Real-voice reference set:**
-  1. The user records about 10 short WAVs (sustained ee/ah/oo plus a sentence, low and high voice).
-  2. They're measured in Praat (steps in `docs/ACCURACY.md`).
-  3. The Praat values go in a fixture file.
-  4. The tests assert the app is within tolerance.
-- **Wrap-up:** record the results in `docs/ACCURACY.md`.
+**Notes:**
+- The progression logic lives in `Analysis/Progression.swift`.
+- New models: `ExerciseResult` and `StrainEvent`.
+- Stage keys: `progression.stage`, `progression.stageStart`, `progression.holdStep`.
+- Keep gender-related lists alphabetical.
 
-**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>`, `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
+**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>` (warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown), `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
 
-**Wrap-up:** build for the simulator, bump to build 45, archive and upload, open a PR from `claude/s15-verification`, merge it, then mark S15 done.
+**Wrap-up:** build for the simulator, run both test suites, bump to build 46, archive and upload, open a PR from `claude/s16-buffer`, merge it, then mark S16 done.

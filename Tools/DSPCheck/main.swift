@@ -3,6 +3,8 @@
 //
 //   Tools/DSPCheck/run.sh                 synthetic check against known values
 //   Tools/DSPCheck/run.sh voice.wav ...   per-file medians, to compare with Praat
+//   Tools/DSPCheck/run.sh --test          pass/fail suite with tolerances (S15);
+//                                         exits 1 on any failure
 //
 // Synthetic vowels use a Klatt-style source–filter model (Rosenberg glottal
 // pulses with slight jitter and shimmer, a cascade of formant resonators, lip
@@ -261,5 +263,152 @@ func fileCheck(_ paths: [String]) {
     }
 }
 
+// MARK: - Pass/fail suite (S15)
+
+/// Tolerances from CLAUDE.md S15 / docs/ACCURACY.md.
+enum Tolerance {
+    static let pitchCents = 5.0
+    /// A frame more than 50 cents off counts as gross (octave-type) error;
+    /// more than this share of gross frames fails.
+    static let grossShare = 0.05
+    static let formantShare = 0.10
+    static let spacingShare = 0.03
+    static let scorePoints = 5.0
+    /// Real recordings vs Praat: both are estimates on a wavering voice.
+    static let realPitchCents = 20.0
+}
+
+var failures: [String] = []
+var checks = 0
+
+func check(_ ok: Bool, _ message: @autoclosure () -> String) {
+    checks += 1
+    if !ok { failures.append(message()) }
+}
+
+/// Back rounded vowels (/u/) lose F4 to LPC: ACCURACY.md "Known limits".
+func isBackRounded(_ v: VowelSpec) -> Bool { v.label.contains("/u/") }
+
+func runTests() {
+    let bw = [80.0, 100, 150, 200, 250]
+    let pitchSets: [(String, [Double])] = [("neutral", [500, 1500, 2500, 3500, 4500])]
+        + vowels.map { ($0.label.trimmingCharacters(in: .whitespaces), $0.formants) }
+
+    // F0 within 5 cents and no octave errors, 65–400 Hz, every vowel.
+    print("pitch: 65–400 Hz in 5 Hz steps × \(pitchSets.count) vowels")
+    for (name, formants) in pitchSets {
+        for f0 in stride(from: 65.0, through: 400, by: 5) {
+            let s = pitchStats(synthesize(f0: f0, formants: formants, bandwidths: bw, seconds: 0.5), truth: f0)
+            guard let m = s.median else { check(false, "pitch \(name) \(Int(f0)) Hz: no reading"); continue }
+            let e = cents(m, f0)
+            check(abs(e) <= Tolerance.pitchCents, "pitch \(name) \(Int(f0)) Hz: median off by \(fmt(e, 1)) cents")
+            check(s.gross <= Tolerance.grossShare,
+                  "pitch \(name) \(Int(f0)) Hz: \(fmt(s.gross * 100))% of frames >50 cents off (octave errors)")
+        }
+    }
+
+    // Mild diplophonia (≤20% alternating amplitude) must not read an octave
+    // low: guards the harmonic-guard trade-off in PitchDetector (S15).
+    print("pitch: mild diplophonia at speaking pitches")
+    for f0 in [120.0, 160, 200, 260] {
+        for alt in [0.1, 0.2] {
+            let s = pitchStats(synthesize(f0: f0, formants: [500, 1500, 2500, 3500, 4500], bandwidths: bw,
+                                          alternate: alt), truth: f0)
+            check(s.gross <= 0.1, "diplophonia \(Int(alt * 100))% at \(Int(f0)) Hz: \(fmt(s.gross * 100))% of frames >50 cents off")
+        }
+    }
+
+    // Formants, ΔF and score per vowel.
+    print("formants: \(vowels.count) vowels")
+    for v in vowels {
+        let s = formantStats(synthesize(f0: v.f0, formants: v.formants, bandwidths: v.bandwidths))
+        let name = v.label.trimmingCharacters(in: .whitespaces)
+        for i in 0..<3 {
+            guard let m = s.formants[i] else { check(false, "\(name): F\(i + 1) missing"); continue }
+            let err = abs(m - v.formants[i]) / v.formants[i]
+            check(err <= Tolerance.formantShare, "\(name): F\(i + 1) \(fmt(m)) vs \(fmt(v.formants[i])) (\(fmt(err * 100, 1))%)")
+        }
+        let dfTrue = trueSpacing(v.formants)
+        if isBackRounded(v) {
+            print("  \(name): ΔF and score skipped (known limit: weak F4 on back rounded vowels)")
+            continue
+        }
+        guard let df = s.spacing else { check(false, "\(name): no ΔF"); continue }
+        let dfErr = abs(df - dfTrue) / dfTrue
+        check(dfErr <= Tolerance.spacingShare, "\(name): ΔF \(fmt(df)) vs \(fmt(dfTrue)) (\(fmt(dfErr * 100, 1))%)")
+        let scoreErr = abs(ResonanceScorer.score(spacing: df) - ResonanceScorer.score(spacing: dfTrue))
+        check(scoreErr <= Tolerance.scorePoints, "\(name): score off by \(fmt(scoreErr, 1)) points")
+    }
+
+    // No resonance reading above 350 Hz: run the app's ResonanceTracker.
+    print("resonance gate: tracker above and below 350 Hz")
+    for f0 in [300.0, 340, 360, 400, 450] {
+        let x = synthesize(f0: f0, formants: vowels[4].formants, bandwidths: bw)
+        final class Box: @unchecked Sendable { var readings = 0 }
+        let box = Box()
+        let tracker = ResonanceTracker(sampleRate: rate) { if $0 != nil { box.readings += 1 } }
+        var i = 0
+        while i + 512 <= x.count {
+            x[i..<(i + 512)].withUnsafeBufferPointer { tracker.process($0, pitch: f0) }
+            i += 512
+        }
+        if f0 > 350 {
+            check(box.readings == 0, "resonance gate: \(box.readings) readings at \(Int(f0)) Hz (should be none above 350)")
+        } else {
+            check(box.readings > 0, "resonance gate: no readings at \(Int(f0)) Hz (should read below 350)")
+        }
+    }
+
+    referenceTests()
+
+    print("\n\(checks - failures.count) of \(checks) checks passed")
+    for f in failures { print("FAIL \(f)") }
+    exit(failures.isEmpty ? 0 : 1)
+}
+
+/// Real-voice reference set: `Tools/DSPCheck/reference/reference.json` lists
+/// WAVs (in the same folder) with values measured in Praat. Missing files are
+/// skipped, so the suite runs before the recordings exist.
+func referenceTests() {
+    struct Entry: Decodable {
+        let file: String
+        let f0: Double
+        let f1: Double?
+        let f2: Double?
+        let f3: Double?
+    }
+    let dir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
+    let folder = ProcessInfo.processInfo.environment["DSPCHECK_REFERENCE"].map { URL(fileURLWithPath: $0) }
+        ?? dir.appendingPathComponent("reference")
+    guard let data = try? Data(contentsOf: folder.appendingPathComponent("reference.json")),
+          let entries = try? JSONDecoder().decode([Entry].self, from: data) else {
+        print("reference set: no reference.json, skipped"); return
+    }
+    var ran = 0
+    for e in entries {
+        guard let x = readWAV(folder.appendingPathComponent(e.file).path) else { continue }
+        ran += 1
+        let p = pitchStats(x, truth: nil)
+        if let m = p.median {
+            check(abs(cents(m, e.f0)) <= Tolerance.realPitchCents,
+                  "\(e.file): F0 \(fmt(m, 1)) vs Praat \(fmt(e.f0, 1)) (\(fmt(cents(m, e.f0), 1)) cents)")
+        } else {
+            check(false, "\(e.file): no pitch reading")
+        }
+        let f = formantStats(x)
+        for (i, truth) in [e.f1, e.f2, e.f3].enumerated() {
+            guard let truth else { continue }
+            guard let m = f.formants[i] else { check(false, "\(e.file): F\(i + 1) missing"); continue }
+            let err = abs(m - truth) / truth
+            check(err <= Tolerance.formantShare,
+                  "\(e.file): F\(i + 1) \(fmt(m)) vs Praat \(fmt(truth)) (\(fmt(err * 100, 1))%)")
+        }
+    }
+    print("reference set: \(ran) of \(entries.count) recordings found")
+}
+
 let args = Array(CommandLine.arguments.dropFirst())
-if args.isEmpty { syntheticCheck() } else if args == ["--probe"] { probe() } else { fileCheck(args) }
+if args.isEmpty { syntheticCheck() }
+else if args == ["--probe"] { probe() }
+else if args == ["--test"] { runTests() }
+else { fileCheck(args) }
