@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// docs/WIREFRAMES.md §8. The colour-blind palette arrives in S13.
+/// docs/WIREFRAMES.md §8.
 struct SettingsView: View {
     @Environment(AudioEngine.self) private var audio
     @Environment(SessionRecorder.self) private var recorder
@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage(StrainGuard.alertsKey) private var strainAlerts = true
     @AppStorage(StrainGuard.capKey) private var capMinutes = StrainGuard.defaultCapMinutes
     @AppStorage(AppLock.enabledKey) private var lockEnabled = false
+    @AppStorage(Palette.key) private var colourBlind = false
     @AppStorage(GoalRange.lowKey) private var goalLow = 0
     @AppStorage(GoalRange.highKey) private var goalHigh = 0
     @AppStorage(ResonanceGoal.lowKey) private var resLow = 0.0
@@ -49,6 +50,13 @@ struct SettingsView: View {
                     Text("Safety")
                 } footer: {
                     Text("Strain alerts compare clarity, steadiness, pitch and loudness against your baseline (or the first minute of a session) and suggest a rest. They're an estimate, not a diagnosis: if you have pain or lasting hoarseness, see a speech-language pathologist.")
+                }
+                Section {
+                    Toggle("Colour-blind palette", isOn: $colourBlind)
+                } header: {
+                    Text("Display")
+                } footer: {
+                    Text("Uses blue, grey and orange for the usually-read-male, ambiguous and usually-read-female zones. Zones always have M / A / F labels too.")
                 }
                 Section {
                     Toggle("\(AppLock.biometryName) lock", isOn: lockBinding)

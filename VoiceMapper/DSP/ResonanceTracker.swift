@@ -27,7 +27,8 @@ final class ResonanceTracker: @unchecked Sendable {
     /// (~0.35 s).
     private static let dropoutFrames = 8
     /// Above this F0 the harmonics are too sparse for LPC to find formants.
-    private static let maxPitch = 450.0
+    /// The S13 check (Tools/DSPCheck) found most vowels collapse above ~350 Hz.
+    private static let maxPitch = 350.0
 
     private var analyzer: FormantAnalyzer
     private let onReading: @Sendable (ResonanceReading?) -> Void

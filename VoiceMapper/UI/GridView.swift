@@ -3,6 +3,7 @@ import SwiftUI
 /// Pitch (up) × resonance (right) grid with typical-zone shading, the goal
 /// pitch band, and a live dot with a short fading trail.
 struct GridView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(GoalRange.lowKey) private var goalLow = 0
     @AppStorage(GoalRange.highKey) private var goalHigh = 0
     @AppStorage(ResonanceGoal.lowKey) private var resLow = 0.0
@@ -234,10 +235,12 @@ struct GridView: View {
     }
 
     private func trailAndDot(in size: CGSize) -> some View {
-        TimelineView(.animation(paused: trail.isEmpty && pitch == nil)) { context in
+        // 60 fps is plenty for a smoothed dot; ProMotion would otherwise redraw at 120.
+        TimelineView(.animation(minimumInterval: 1.0 / 60, paused: trail.isEmpty && pitch == nil)) { context in
             Canvas { gc, _ in
                 let now = context.date
-                let live = trail.filter { now.timeIntervalSince($0.date) < Self.trailLife }
+                // Reduce Motion: just the dot, no fading trail.
+                let live = reduceMotion ? [] : trail.filter { now.timeIntervalSince($0.date) < Self.trailLife }
                 var path = Path()
                 for (i, p) in live.enumerated() {
                     let pt = CGPoint(x: x(p.x, size), y: y(p.midi, size))

@@ -22,6 +22,11 @@ struct PitchDetector {
     /// subharmonic (octave error).
     private static let octaveDipLimit: Float = 0.25
     /// Frames quieter than this (RMS, full scale = 1) are treated as silence.
+    /// Harmonic guard: a multiple-lag dip wins if it is under this share of the
+    /// chosen dip and lower by at least `harmonicGap`. The gap keeps jitter on
+    /// already-clean dips from triggering it; the ratio keeps noise from it.
+    private static let harmonicRatio: Float = 0.5
+    private static let harmonicGap: Float = 0.07
     private static let silenceRMS: Float = 0.003
 
     let sampleRate: Double
@@ -77,6 +82,7 @@ struct PitchDetector {
         }
 
         var best = -1
+        var clear = true
         var tau = tauMin
         while tau <= tauMax {
             if cmnd[tau] < Self.dipThreshold {
@@ -90,13 +96,35 @@ struct PitchDetector {
             // No clear dip: fall back to the deepest one, if voiced at all.
             best = (tauMin...tauMax).min { cmnd[$0] < cmnd[$1] } ?? tauMin
             guard cmnd[best] < Self.voicedLimit else { return nil }
+            clear = false
+        }
+
+        // Harmonic guard: when a harmonic (2·F0, 4·F0…) sits on F1 it dominates
+        // and a fractional-period dip can slip under the threshold (≈0.1–0.15)
+        // while the true period's dip is far deeper (≈0.001). A truly periodic
+        // voice has multiple-lag dips about as deep as the first, so the first
+        // multiple that is much deeper is the real period (S13 check).
+        if clear, cmnd[best] > Self.harmonicGap {
+            let first = best
+            for k in 2...6 {
+                let lag = first * k
+                guard lag + 2 <= tauMax else { break }
+                if let alt = ((lag - 2)...(lag + 2)).min(by: { cmnd[$0] < cmnd[$1] }),
+                   cmnd[alt] < cmnd[first] * Self.harmonicRatio,
+                   cmnd[first] - cmnd[alt] > Self.harmonicGap {
+                    best = alt
+                    break
+                }
+            }
         }
 
         // Octave-down guard: on weak, breathy or creaky frames the deepest dip
-        // is often the subharmonic. If half that lag is also a clean dip, the
-        // true period is the shorter one.
+        // is often the subharmonic. If half that lag is also a fair dip, the
+        // true period is the shorter one. Only for frames without a clear dip:
+        // the scan above already takes the shortest clear one, so applying it
+        // there doubled the pitch whenever 2·F0 sat near F1 (S13 check).
         let half = best / 2
-        if half >= tauMin {
+        if !clear, half >= tauMin {
             let lo = max(tauMin, half - 2), hi = min(tauMax, half + 2)
             if let alt = (lo...hi).min(by: { cmnd[$0] < cmnd[$1] }), cmnd[alt] < Self.octaveDipLimit {
                 best = alt

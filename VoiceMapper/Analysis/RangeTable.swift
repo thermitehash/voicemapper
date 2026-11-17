@@ -35,10 +35,19 @@ enum PerceivedGender: Sendable {
 
     /// Pure zone colour as RGB, shared with the blended grid shading.
     var rgb: (Double, Double, Double) {
+        if Palette.colourBlind {
+            // Okabe & Ito (2008) blue / grey / orange: distinct under the
+            // common colour-vision deficiencies, and in greyscale by lightness.
+            switch self {
+            case .male: return (0.0, 0.447, 0.698)
+            case .ambiguous: return (0.6, 0.6, 0.6)
+            case .female: return (0.902, 0.624, 0.0)
+            }
+        }
         switch self {
-        case .male: (0.0, 0.48, 1.0)
-        case .ambiguous: (0.69, 0.32, 0.87)
-        case .female: (1.0, 0.45, 0.75)
+        case .male: return (0.0, 0.48, 1.0)
+        case .ambiguous: return (0.69, 0.32, 0.87)
+        case .female: return (1.0, 0.45, 0.75)
         }
     }
 
@@ -74,6 +83,18 @@ enum PerceivedGender: Sendable {
         default: self = .female
         }
     }
+}
+
+/// Settings ▸ Colour-blind palette. Cached in a static because zone colours
+/// are read for every grid cell on every redraw; RootTabView keeps it in sync
+/// with the stored setting and rebuilds the tabs when it changes.
+enum Palette {
+    static let key = "display.colourBlindPalette"
+    nonisolated(unsafe) static var colourBlind = UserDefaults.standard.bool(forKey: key)
+
+    /// Heat-map fill: orange normally; with the colour-blind palette orange is
+    /// a zone colour, so the heat map switches to the primary colour.
+    static var heat: Color { colourBlind ? .primary : .orange }
 }
 
 /// Classical voice type whose range the note most typically sits in.

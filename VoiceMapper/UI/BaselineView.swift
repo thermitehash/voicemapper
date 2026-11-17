@@ -30,9 +30,13 @@ struct BaselineView: View {
                 }
                 if isRecording {
                     ProgressView(value: elapsed, total: Self.length)
+                        .accessibilityLabel("Recording")
+                        .accessibilityValue("\(Int(Self.length - elapsed)) seconds left")
                     if audio.isNoisy { NoiseBanner() }
                     Text(audio.pitch.map { "\($0.note.name)" } ?? "–")
                         .font(.system(size: 56, weight: .semibold, design: .rounded))
+                        .accessibilityLabel("Current note")
+                        .accessibilityValue(audio.pitch?.note.name ?? "none")
                     Button("Cancel", role: .cancel) { cancel() }
                 } else {
                     if let result { Text(result).font(.headline) }
