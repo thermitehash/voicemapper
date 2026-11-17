@@ -384,6 +384,22 @@ func input(_ stage: Stage, sessions: [PracticeSession] = [], results: [ExerciseR
            "warm-up on 2 of 6 days → not ready")
     expect(!Progression.status(input(.fineTuning, sessions: practised)).ready, "last stage is never 'ready'")
 
+    group("Silent exercises don't count (S16)")
+    let silentWarmups = (1...6).map { result("warmup", daysAgo($0), passed: false) }
+    let silent = Progression.status(input(.foundations, results: silentWarmups))
+    expect(!silent.ready, "tapping through warm-ups without voice → not ready")
+    expect(Progression.practiceDays(input(.foundations, results: silentWarmups), since: nil).isEmpty,
+           "unpassed results aren't practice days")
+
+    group("History stage markers")
+    let path = [result("warmup", daysAgo(9)), result("warmup", daysAgo(5)), result("hold", daysAgo(4)),
+                result("vowels", daysAgo(1))]
+    path[1].stage = 2; path[2].stage = 2; path[3].stage = 3
+    let changes = Progression.stageChanges(path)
+    expect(changes.map(\.stage) == [.pitch, .resonance], "changes 1→2→3, got \(changes.map(\.stage.rawValue))")
+    expect(changes.first?.date == daysAgo(5), "stage 2 marker at its first result")
+    expect(Progression.stageChanges([result("warmup", daysAgo(1))]).isEmpty, "staying in stage 1 → no markers")
+
     group("Goal zone share (stage 4)")
     let goal = GoalRange(low: 57, high: 61)!
     let band = ResonanceGoal(low: 60, high: 80)!

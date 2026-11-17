@@ -36,6 +36,8 @@ struct ExerciseRunView: View {
     @State private var resonanceSamples: [Double] = []
     @State private var strainAlerts = 0
     @State private var nextStepMessage: String?
+    @State private var tooLittleVoice = false
+    @State private var semitoneRange: Double?
 
     private static let tick = 0.1
     /// Off-target time (breath, wobble) before a hold restarts.
@@ -178,7 +180,7 @@ struct ExerciseRunView: View {
                 .font(.subheadline)
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
-            if isSteppedHold {
+            if isSteppedHold, GoalRange(low: goalLow, high: goalHigh) != nil {
                 Text("Stage 2 steps: this target moves 1 semitone towards your goal after you pass it on \(Progression.passesPerStep) separate days.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -228,7 +230,15 @@ struct ExerciseRunView: View {
             if let nextStepMessage {
                 Text(nextStepMessage).multilineTextAlignment(.center)
             }
-            if strainAlerts > 0 {
+            if exercise.id == Exercise.intonationID, let semitoneRange, !tooLittleVoice {
+                Text("Your pitch moved across about \(Int(semitoneRange.rounded())) semitones. There's no right amount: use the melody that feels like you.")
+                    .multilineTextAlignment(.center)
+            }
+            if tooLittleVoice {
+                Text("The mic heard very little voice, so this won't count towards your stage. Next time, tap Start and practise aloud.")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+            } else if strainAlerts > 0 {
                 Text("There was a strain alert during this exercise, so it won't count towards moving on. Rest your voice before trying again.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
@@ -248,6 +258,16 @@ struct ExerciseRunView: View {
     }
 
     // MARK: - Logic
+
+    /// Voiced seconds an exercise needs to count towards the stage: a quarter
+    /// of a guided exercise's length (speech is ~50% voiced, with pauses),
+    /// capped at 20 s. Guided steps can be tapped through with the mic off.
+    private var requiredVoice: Double {
+        switch exercise.kind {
+        case .guided(let steps): min(20, 0.25 * steps.reduce(0) { $0 + $1.seconds })
+        case .hold, .reading: 0  // can't finish without voice anyway
+        }
+    }
 
     private var isSteppedHold: Bool {
         if case .hold = exercise.kind { return Progression.stage(stored: stage) == .pitch }
@@ -348,15 +368,19 @@ struct ExerciseRunView: View {
     private func record() {
         var isHold = false
         if case .hold = exercise.kind { isHold = true }
+        let voiced = Double(pitchSamples.count) * Self.tick
         let result = ExerciseResult(
-            date: .now, exerciseID: exercise.id, stage: stage, passed: strainAlerts == 0,
-            voicedSeconds: Double(pitchSamples.count) * Self.tick, strainAlerts: strainAlerts)
+            date: .now, exerciseID: exercise.id, stage: stage,
+            passed: strainAlerts == 0 && voiced >= requiredVoice,
+            voicedSeconds: voiced, strainAlerts: strainAlerts)
+        tooLittleVoice = voiced < requiredVoice
         result.targetMidi = isHold ? targetMidi : nil
         result.medianHz = median(pitchSamples)
         if let lo = percentile(pitchSamples, 0.1), let hi = percentile(pitchSamples, 0.9) {
             result.semitoneRange = Note.midiValue(frequency: hi) - Note.midiValue(frequency: lo)
         }
         result.medianResonance = median(resonanceSamples)
+        semitoneRange = result.semitoneRange
         context.insert(result)
         try? context.save()
 

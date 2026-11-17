@@ -52,15 +52,20 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | done |
 | S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | done |
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
-| S16 | Buffer | Bug fixes | — | todo |
+| S16 | Buffer | Bug fixes | — | in progress (merged fixes; build 46 waits for build 45 feedback) |
 
 ## Next session: S16 Buffer (Sonnet, build 46)
 S1–S15 are merged into `main`. TestFlight's latest build is 45 (S15).
 
+**Done so far in S16 (merged, not yet shipped):**
+- Exercises need real voiced time to count towards a stage. Before, guided steps could be tapped through silently and still counted as practice.
+- The Intonation finish screen shows the semitone range, as its basis text promises.
+- The stage 2 stepping note is hidden when no goal is set.
+- History stage markers (dashed lines) on the pitch and resonance charts, read from `ExerciseResult.stage`. Not yet checked visually with real data.
+
 **Open items:**
 - **Real-voice reference set:** the user records the WAVs listed in `Tools/DSPCheck/reference/README.md`, measures them with `measure.praat`, and runs `Tools/DSPCheck/run.sh --test`. Record the result in `docs/ACCURACY.md`. The WAVs are git-ignored; only `reference.json` is committed.
 - **Device test of the S15 pitch fix:** check high "ah" sirens (370–480 Hz) and normal speech. Rough or creaky voice must not read an octave low.
-- **History stage markers** (docs/PROGRESSION.md), not built in S14.
 - **SLP review** of `docs/EXERCISE_EVIDENCE.md`. Don't call the app "SLP-approved" until one has.
 - **Performance:** profile with Instruments on device if anything feels slow.
 - **XCTest target:** optional, if the user wants tests in Xcode. The command-line suites already cover the scope.
