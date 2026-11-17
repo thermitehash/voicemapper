@@ -72,6 +72,7 @@ S1–S15 are merged into `main`. TestFlight's latest build is 46 (S16 part 1, in
 - **Before the larger external group:** use build 47 or later, not 45. Gate it on device testing of the progression for about a week, the real-voice comparison passing, and ideally the SLP review. The first external build needs Beta App Review (a beta description and contact email in App Store Connect).
 - **Performance:** profile with Instruments on device if anything feels slow.
 - **XCTest target:** optional, if the user wants tests in Xcode. The command-line suites already cover the scope.
+- **Maybe later: version for non-iPhone friends.** Not scheduled; see the last section of `docs/PLAN.md` (preferred: web app, ~5–7 sessions). Revisit after S16.
 
 **Notes:**
 - The progression logic lives in `Analysis/Progression.swift`.
