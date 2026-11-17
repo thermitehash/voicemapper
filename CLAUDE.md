@@ -52,12 +52,12 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S13 | Polish | Praat accuracy check, accessibility, colour-blind palette, performance | Overall testing | done |
 | S14 | Progression | Stages new learner → fine tuner, Today's plan, stepped hold target, ExerciseResult (see `docs/PROGRESSION.md`) | Plan adapts over several days | done |
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
-| S16 | Buffer | Bug fixes | — | in progress (merged fixes; build 46 waits for build 45 feedback) |
+| S16 | Buffer | Bug fixes | — | in progress (build 46 uploaded for internal testers; more fixes from device feedback) |
 
 ## Next session: S16 Buffer (Sonnet, build 46)
-S1–S15 are merged into `main`. TestFlight's latest build is 45 (S15).
+S1–S15 are merged into `main`. TestFlight's latest build is 46 (S16 part 1, internal only). External testers are still on build 45, pending Beta App Review.
 
-**Done so far in S16 (merged, not yet shipped):**
+**Done so far in S16 (build 46, internal testers only):**
 - Exercises need real voiced time to count towards a stage. Before, guided steps could be tapped through silently and still counted as practice.
 - The Intonation finish screen shows the semitone range, as its basis text promises.
 - The stage 2 stepping note is hidden when no goal is set.
@@ -78,4 +78,4 @@ S1–S15 are merged into `main`. TestFlight's latest build is 45 (S15).
 
 **Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>` (warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown), `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
 
-**Wrap-up:** build for the simulator, run both test suites, bump to build 46, archive and upload, open a PR from `claude/s16-buffer`, merge it, then mark S16 done.
+**Wrap-up:** build for the simulator, run both test suites, bump to build 47, archive and upload, open a PR from `claude/s16-buffer-2`, merge it, then mark S16 done.
