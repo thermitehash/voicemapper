@@ -1,17 +1,31 @@
 package com.thrivestorm2.voicemapper.core.analysis
 
 import com.thrivestorm2.voicemapper.core.dsp.VoiceQuality
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+
+/** Stores an [Instant] as epoch milliseconds. */
+object InstantMillis : KSerializer<Instant> {
+    override val descriptor = PrimitiveSerialDescriptor("InstantMillis", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeLong(value.toEpochMilli())
+    override fun deserialize(decoder: Decoder): Instant = Instant.ofEpochMilli(decoder.decodeLong())
+}
 
 // Plain versions of the iOS SwiftData models (Store/Models.swift). The app's
 // Room entities map to and from these, so all logic stays testable on the JVM.
 // Only summaries and per-cell voiced time are kept — never audio.
 
 /** One continuous stretch of capturing. */
+@Serializable
 data class PracticeSession(
-    val start: Instant,
+    @Serializable(with = InstantMillis::class) val start: Instant,
     /** Wall-clock seconds capturing. */
     val duration: Double,
     val voicedSeconds: Double,
@@ -27,6 +41,7 @@ data class PracticeSession(
 )
 
 /** Voiced seconds in one grid cell (one semitone × one 5-point resonance band). */
+@Serializable
 data class GridCell(val pitchMidi: Int, val resonanceBin: Int, val seconds: Double) {
     companion object {
         const val RESONANCE_BIN_WIDTH = 5.0
@@ -35,6 +50,7 @@ data class GridCell(val pitchMidi: Int, val resonanceBin: Int, val seconds: Doub
 }
 
 /** Medians of the voice-quality measures over a session or the baseline. */
+@Serializable
 data class QualitySummary(
     val hnr: Double,
     val cpp: Double,
@@ -53,16 +69,18 @@ data class QualitySummary(
 }
 
 /** The user's reference voice from a 30-second reading. */
+@Serializable
 data class Baseline(
-    val date: Instant,
+    @Serializable(with = InstantMillis::class) val date: Instant,
     val medianHz: Double,
     val medianResonance: Double?,
     val quality: QualitySummary? = null,
 )
 
 /** One finished exercise (S14). */
+@Serializable
 data class ExerciseResult(
-    val date: Instant,
+    @Serializable(with = InstantMillis::class) val date: Instant,
     val exerciseId: String,
     val stage: Int,
     /** Completed with real voiced time and no strain alert. */

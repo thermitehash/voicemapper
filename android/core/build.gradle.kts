@@ -3,6 +3,7 @@
 //   ./gradlew :core:test
 plugins {
     id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 kotlin {
@@ -10,6 +11,8 @@ kotlin {
 }
 
 dependencies {
+    // Only for persisting the models; no Android dependencies here.
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
     testImplementation("junit:junit:4.13.2")
 }
 
