@@ -29,4 +29,4 @@ This data is excluded from cloud backups and device-to-device transfer.
 VoiceMapper gives estimates to support practice. It is not a medical device and does not diagnose. If you have pain, lasting hoarseness or lose your voice, see a speech-language pathologist.
 
 ## Contact
-Questions: open an issue at https://github.com/thrivestorm2/voicemapper/issues
+Questions: open an issue at https://github.com/thermitehash/voicemapper/issues

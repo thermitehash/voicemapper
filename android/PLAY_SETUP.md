@@ -20,7 +20,7 @@ If R8 fails with "Type … is defined multiple times" on a file named `… 2.cla
 ## App content answers (Dashboard ▸ "Set up your app")
 | Section | Answer |
 |---|---|
-| Privacy policy | https://github.com/thrivestorm2/voicemapper/blob/main/PRIVACY.md |
+| Privacy policy | https://github.com/thermitehash/voicemapper/blob/main/PRIVACY.md |
 | App access | All functionality is available without special access |
 | Ads | No, my app does not contain ads |
 | Content rating | Category: All other app types. Answer **No** to every question (no violence, sexual content, profanity, drugs, gambling, user interaction or sharing, location sharing, purchases) |
