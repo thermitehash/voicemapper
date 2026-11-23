@@ -18,7 +18,15 @@ Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES
 - Use Sonnet for routine UI sessions; Opus for DSP sessions (S3, S5, S6, S10).
 
 ## Android port (`android/`)
-Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test` (DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Testers: Galaxy A52 / Android 14, Galaxy S22 / Android 16, and the user's Moto G Play; distribution is moving to Google Play internal testing (`android/PLAY_SETUP.md`). Hear-yourself is ported but untested on a real phone. Build output goes to `*/build.nosync` because Documents is iCloud-synced. Branch: `claude/android-N`.
+Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test` (DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Build output goes to `*/build.nosync` because Documents is iCloud-synced (iCloud duplicated build files and broke R8). Branch: `claude/android-N`.
+
+| # | Session | Scope | Status |
+|---|---|---|---|
+| A1 | Port | `core` (DSP + analysis + test suites + ParityTest), full app: five tabs, onboarding, baseline, strain alerts, daily cap, progression, History, app lock | done (emulator only) |
+| A2 | Play + hear-yourself | Privacy policy (`PRIVACY.md`), Play setup notes and store assets (`android/PLAY_SETUP.md`, `android/dist/`), hear-yourself (low-latency monitor, delay, voice level, Bluetooth banner), version 0.2 | done (hear-yourself untested on a phone) |
+| A3 | Device testing | First Play internal-testing release, fix what the device checklist in `android/README.md` turns up | next |
+
+**Next Android session (A3):** the user is setting up a Google Play developer account (developer name **thermitehash**, personal, not a trader). Play Console needs device verification, so they ordered a Moto G Play (budget phone with a headphone jack). Once it's verified they upload `android/dist/VoiceMapper-android-0.2.aab` to internal testing and send testers the opt-in link (steps in `android/PLAY_SETUP.md`). Testers: Galaxy A52 / Android 14 and Galaxy S22 / Android 16. Start by asking for the Settings ▸ Microphone line from each phone, the hear-yourself "Device delay" figure, and results from the README device checklist. Every new upload needs a higher `versionCode` (now 2).
 
 ## Stack
 SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData

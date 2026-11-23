@@ -44,7 +44,7 @@ Guiding principle: whatever helps the user accomplish their voice goal safely.
 - Strain detection is heuristic, not diagnostic → state clearly, point to an SLP.
 
 ## Maybe later: version for friends without iPhones
-**Update (Nov 2026):** started as native Android (Kotlin/Compose) in `android/`, because two Android testers are lined up. The DSP and analysis are ported with the same test suites and a parity check against the Swift sources; see `android/README.md`. The notes below are the original options.
+**Update (Nov 2026):** built as native Android (Kotlin/Compose) in `android/`, because two Android testers are lined up. The DSP and analysis are ported with the same test suites and a parity check against the Swift sources. The whole app is ported, including hear-yourself (version 0.2), and it's being distributed through Google Play internal testing. See `android/README.md`, and the Android status table in `CLAUDE.md`. The notes below are the original options.
 
 Not scheduled. Revisit after S16, the real-voice check and the SLP review, so the port uses checked algorithms.
 - **Preferred: web app (PWA), ~5–7 sessions.** Runs in any phone browser, add-to-home-screen, fully local and offline after first load (static hosting, e.g. GitHub Pages). Port DSP + Analysis to TypeScript and port both test suites with the same tolerances. Mic with echo cancellation, noise suppression and auto gain off. Scope: live pitch/resonance, grid, range table, exercises, progression, history, export/backup. Leave out hear-yourself (browser latency) and the Bluetooth banner (not detectable); Face ID lock optional later via passkeys.

@@ -43,15 +43,18 @@ adb shell am start -n com.thrivestorm2.voicemapper/.MainActivity \
 ```
 `debugTab`: live | range | exercises | history | settings. `debugSeed` fills two weeks of made-up sessions. `debugExercise <id>` opens an exercise. `debugGoal 52,59` sets the pitch goal (MIDI low,high). `debugReading true` shows a sample reading on Live and Range, for store screenshots.
 
-## Installing on a tester's phone (sideloading)
-No Play Store account is needed for a couple of testers.
-1. Send them `app-release.apk`, by email, Google Drive, or whatever they use.
+## Installing on a tester's phone
+The main route is **Google Play internal testing**: see `PLAY_SETUP.md`. Testers open an opt-in link once, then install and update from the Play Store.
+
+### Sideloading (fallback)
+No Play Store account is needed for this.
+1. Send them the APK from `dist/` (e.g. `VoiceMapper-android-0.2.apk`), by email, Google Drive, or whatever they use.
 2. On the phone, open the file. Android asks to allow installs from that app (Files, Gmail, Chrome…): tap **Settings ▸ Allow from this source**, go back, then **Install**.
 3. Samsung phones may show "Auto Blocker" (One UI 6+). Turn it off for the install under **Settings ▸ Security and privacy ▸ Auto Blocker**, then turn it back on.
 4. Google Play Protect may warn about an unknown developer. Tap **More details ▸ Install anyway**.
 5. For updates, send the new APK and install it over the old one. Data is kept as long as it's signed with the same key.
 
-Google is bringing in developer verification for apps installed outside the Play Store, rolling out by country. If a tester's phone refuses the install, the fallback is a Play Console account ($25 one-time) and its **internal testing** track, which needs no review and takes up to 100 testers by email.
+Google is bringing in developer verification for apps installed outside the Play Store, rolling out by country, so a sideloaded APK may stop installing on some phones. Play internal testing avoids that.
 
 ## Device test checklist (needs real phones)
 The emulator can't test real voice input or headphones. Testers: Galaxy A52 (Android 14), Galaxy S22 (Android 16), plus the developer's Moto G Play (budget phone, has a headphone jack).
