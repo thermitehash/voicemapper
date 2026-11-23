@@ -69,7 +69,7 @@ struct ExercisesView: View {
                         if let next = currentStage.next { Progression.choose(next) }
                     }
                 } footer: {
-                    Text("Stages are suggestions. You can move to any stage in Settings ▸ Goal. Voice guidelines recommend seeing a speech-language pathologist at least once before changing your voice on your own.")
+                    Text(regional: "Stages are suggestions. You can move to any stage in Settings ▸ Goal. Voice guidelines recommend seeing a speech-language pathologist at least once before changing your voice on your own.")
                 }
 
                 Section {
@@ -134,7 +134,7 @@ private struct ExerciseRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(exercise.title + (exercise.isWarmUp ? " (required)" : ""))
                     .font(.body.weight(exercise.isWarmUp && needsWarmUp ? .semibold : .regular))
-                Text(roleLabel.map { "\($0) · \(exercise.summary)" } ?? exercise.summary)
+                Text(regional: roleLabel.map { "\($0) · \(exercise.summary)" } ?? exercise.summary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -194,7 +194,7 @@ private struct StagePathHeader: View {
                     .foregroundStyle(.secondary)
                 ForEach(status.criteria) { c in
                     Label {
-                        Text(c.text).font(.subheadline)
+                        Text(regional: c.text).font(.subheadline)
                     } icon: {
                         Image(systemName: c.met ? "checkmark.circle.fill" : "circle")
                             .foregroundStyle(c.met ? Color.green : Color.secondary)

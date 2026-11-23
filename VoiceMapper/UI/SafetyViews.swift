@@ -30,7 +30,7 @@ struct SafetyAlertOverlay: View {
         case .dailyCap(let minutes):
             AlertCard(
                 symbol: "moon.zzz.fill", title: "Daily practice cap reached",
-                message: "You've practised \(minutes) minutes today. Short, regular sessions are kinder to your voice than long ones.",
+                message: "You've practised \(minutes) minutes today. Short, regular sessions are kinder to your voice than long ones.", // shown via Text(regional:)
                 primary: ("Stop for today", { stopCapture(); strain.stopForToday() }),
                 secondary: ("5 more minutes", { strain.dismiss() }))
         }
@@ -56,8 +56,8 @@ private struct AlertCard: View {
             Label(title, systemImage: symbol)
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(.tint)
-            Text(message)
-            Text("This is an estimate, not a diagnosis. If you have pain, lasting hoarseness or lose your voice, see a speech-language pathologist.")
+            Text(regional: message)
+            Text(regional: "This is an estimate, not a diagnosis. If you have pain, lasting hoarseness or lose your voice, see a speech-language pathologist.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             HStack {

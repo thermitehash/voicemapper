@@ -201,7 +201,7 @@ private struct DelayTips: View {
             Label("Use wired headphones. Bluetooth adds about 150–250 ms.", systemImage: "cable.connector")
             VStack(alignment: .leading, spacing: 4) {
                 Label("Headphones with a cable may still use Bluetooth when it's plugged in. To force the cable:", systemImage: "bolt.horizontal")
-                Text("1. Plug in the cable.\n2. Turn Bluetooth off in Settings → Bluetooth. (Control Center only disconnects for a while.)\n3. Check that Route above no longer says Bluetooth.")
+                Text(regional: "1. Plug in the cable.\n2. Turn Bluetooth off in Settings → Bluetooth. (Control Centre only disconnects for a while.)\n3. Check that Route above no longer says Bluetooth.")
                     .padding(.leading, 28)
             }
             Label("On AirPods, set noise control to Off or Noise Cancellation. Transparency and Adaptive add processing.", systemImage: "airpodsmax")

@@ -450,6 +450,71 @@ func input(_ stage: Stage, sessions: [PracticeSession] = [], results: [ExerciseR
     }
 }
 
+// MARK: - Regional spelling
+
+func steps(of e: Exercise) -> [String] {
+    if case .guided(let steps) = e.kind { return steps.map(\.text) }
+    return []
+}
+
+@MainActor func testRegionalSpelling() {
+    group("RegionalSpelling (US / Canada / UK, AU, NZ)")
+    typealias R = RegionalSpelling
+    expect(R.variant(preferredLanguages: ["en-US"], region: "GB") == .american, "en-US → American")
+    expect(R.variant(preferredLanguages: ["en-CA"], region: "US") == .canadian, "en-CA → Canadian")
+    expect(R.variant(preferredLanguages: ["en-GB"], region: "US") == .british, "en-GB → British")
+    expect(R.variant(preferredLanguages: ["en-AU"], region: "US") == .australian, "en-AU → Australian")
+    expect(R.variant(preferredLanguages: ["en-NZ"], region: "US") == .newZealand, "en-NZ → New Zealand")
+    expect(R.variant(preferredLanguages: ["en"], region: "CA") == .canadian, "en + region CA → Canadian")
+    expect(R.variant(preferredLanguages: ["en"], region: "NZ") == .newZealand, "en + region NZ → New Zealand")
+    expect(R.variant(preferredLanguages: [], region: nil) == .british, "unknown → British")
+
+    let slp = "Not a substitute for a speech-language pathologist."
+    expect(R.apply(slp, variant: .american) == slp, "US keeps speech-language pathologist")
+    expect(R.apply(slp, variant: .canadian) == slp, "Canada keeps speech-language pathologist")
+    expect(R.apply(slp, variant: .british) == "Not a substitute for a speech and language therapist.", "UK term")
+    expect(R.apply(slp, variant: .australian) == "Not a substitute for a speech pathologist.", "AU term")
+    expect(R.apply(slp, variant: .newZealand) == "Not a substitute for a speech-language therapist.", "NZ term")
+    for region in ["US", "CA", "GB", "AU", "NZ", nil] {
+        expect(R.directory(region: region).url.scheme == "https", "directory link for \(region ?? "unknown")")
+    }
+    expect(R.directory(region: "AU").url.host?.contains("speechpathologyaustralia") == true, "AU directory")
+
+    let src = "Practise the colour drill; you've practised. Recognised by my mum. Grey, centre, Control Centre."
+    for v in [R.Variant.british, .australian, .newZealand] { expect(R.apply(src, variant: v) == src, "\(v) spelling unchanged") }
+    expect(R.apply(src, variant: .american) == "Practice the color drill; you've practiced. Recognized by my mom. Gray, center, Control Center.",
+           "American: \(R.apply(src, variant: .american))")
+    expect(R.apply(src, variant: .canadian) == "Practise the color drill; you've practised. Recognized by my mom. Grey, centre, Control Centre."
+           .replacingOccurrences(of: "color", with: "colour"),
+           "Canadian: \(R.apply(src, variant: .canadian))")
+    expect(R.apply("Daily practice cap, maximum, summer, Colour-blind", variant: .american) == "Daily practice cap, maximum, summer, Color-blind",
+           "whole words only")
+
+    // Every exercise and stage string comes out free of British forms for US users.
+    let british = try! NSRegularExpression(pattern: "\\b([Pp]ractis|[Cc]olour|[Cc]entre|[Rr]ecognis|[Gg]rey\\b|[Mm]um\\b|speech-language patholog)")
+    var texts = Exercise.all.flatMap { [$0.title, $0.summary, $0.basis.summary, $0.basis.strength.label] + steps(of: $0) }
+    texts.append(RainbowPassage.text)
+    for t in texts {
+        let us = R.apply(t, variant: .american)
+        expect(british.firstMatch(in: us, range: NSRange(us.startIndex..., in: us)) == nil, "British form left for US: \(us.prefix(60))")
+    }
+
+    // UI literals with a British form must go through Text(regional:).
+    let ui = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../VoiceMapper/UI")
+    let files = (try? FileManager.default.contentsOfDirectory(at: ui, includingPropertiesForKeys: nil)) ?? []
+    expect(files.count > 5, "found UI sources")
+    for file in files where file.pathExtension == "swift" {
+        let lines = ((try? String(contentsOf: file, encoding: .utf8)) ?? "").components(separatedBy: "\n")
+        for (i, line) in lines.enumerated() where line.contains("\"") && !line.contains("regional") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("//") || trimmed.hasPrefix("@AppStorage") { continue }
+            let literals = line.components(separatedBy: "\"").enumerated().filter { $0.offset % 2 == 1 }.map(\.element).joined(separator: " ")
+            expect(british.firstMatch(in: literals, range: NSRange(literals.startIndex..., in: literals)) == nil,
+                   "\(file.lastPathComponent):\(i + 1) shows British spelling without Text(regional:)")
+        }
+    }
+}
+
 // MARK: - Main
 
 @main struct MappingTests {
@@ -463,6 +528,7 @@ func input(_ stage: Stage, sessions: [PracticeSession] = [], results: [ExerciseR
         testExerciseLog()
         testProgression()
         testExercises()
+        testRegionalSpelling()
         let r = Results.shared
         print("\n\(r.count - r.failures.count) of \(r.count) checks passed")
         for f in r.failures { print("FAIL \(f)") }

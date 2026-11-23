@@ -140,7 +140,7 @@ struct ExerciseRunView: View {
             Text("Step \(min(step, steps.count - 1) + 1) of \(steps.count)")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text(current.text)
+            Text(regional: current.text)
                 .font(.title3)
                 .fixedSize(horizontal: false, vertical: true)
             ProgressView(value: min(stepElapsed / current.seconds, 1))
@@ -195,9 +195,9 @@ struct ExerciseRunView: View {
 
     private func reading(seconds: Double) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Read aloud slowly, using the voice you're practising. Stop and breathe whenever you need to.")
+            Text(regional: "Read aloud slowly, using the voice you're practising. Stop and breathe whenever you need to.")
                 .foregroundStyle(.secondary)
-            Text(RainbowPassage.text).font(.title3)
+            Text(regional: RainbowPassage.text).font(.title3)
             Text(RainbowPassage.citation).font(.caption).foregroundStyle(.secondary)
             ProgressView(value: min(readSeconds / seconds, 1))
             Text("\(Int(readSeconds)) s of \(Int(seconds)) s voiced")
@@ -235,7 +235,7 @@ struct ExerciseRunView: View {
                     .multilineTextAlignment(.center)
             }
             if tooLittleVoice {
-                Text("The mic heard very little voice, so this won't count towards your stage. Next time, tap Start and practise aloud.")
+                Text(regional: "The mic heard very little voice, so this won't count towards your stage. Next time, tap Start and practise aloud.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             } else if strainAlerts > 0 {
@@ -247,7 +247,7 @@ struct ExerciseRunView: View {
                 Text("Nice work today. Rest your voice and drink some water.")
                     .multilineTextAlignment(.center)
             } else if !done.contains(Exercise.coolDownID) {
-                Text("When you've finished practising for today, end with the cool-down.")
+                Text(regional: "When you've finished practising for today, end with the cool-down.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             }
@@ -407,7 +407,7 @@ private struct BasisView: View {
     var body: some View {
         DisclosureGroup {
             VStack(alignment: .leading, spacing: 8) {
-                Text(basis.summary)
+                Text(regional: basis.summary)
                     .font(.subheadline)
                 ForEach(basis.citations, id: \.self) { citation in
                     Text(citation)
@@ -424,7 +424,7 @@ private struct BasisView: View {
             HStack {
                 Text("Why this exercise")
                 Spacer()
-                Text(basis.strength.label)
+                Text(regional: basis.strength.label)
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)

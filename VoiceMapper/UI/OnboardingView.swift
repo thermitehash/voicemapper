@@ -66,7 +66,7 @@ struct OnboardingView: View {
 
     private var disclaimer: some View {
         page(symbol: "stethoscope", title: "Before you start") {
-            Text("VoiceMapper is a practice tool, not medical advice, and not a substitute for a speech-language pathologist.")
+            Text(regional: "VoiceMapper is a practice tool, not medical advice, and not a substitute for a speech-language pathologist.")
             Text("Its strain alerts are estimates, not a diagnosis. Stop if anything hurts or feels scratchy, and see a professional if you have pain or hoarseness that lasts.")
             Text("Working with a voice therapist who specialises in gender-affirming voice care is the safest way to train. Settings has a link to help you find one.")
         }
@@ -119,8 +119,8 @@ struct OnboardingView: View {
 
     private var headphones: some View {
         page(symbol: "headphones", title: "Hearing yourself") {
-            Text("You can hear your own voice through headphones while you practise. Wired headphones work best: Bluetooth adds a delay of about 150–250 ms, which makes it harder to follow your voice.")
-            Text("The mic picks up your voice fine without headphones. Practise somewhere quiet, at a comfortable volume, and keep sessions short.")
+            Text(regional: "You can hear your own voice through headphones while you practise. Wired headphones work best: Bluetooth adds a delay of about 150–250 ms, which makes it harder to follow your voice.")
+            Text(regional: "The mic picks up your voice fine without headphones. Practise somewhere quiet, at a comfortable volume, and keep sessions short.")
         }
     }
 
@@ -130,7 +130,7 @@ struct OnboardingView: View {
     /// capped so the buttons leave room for the page text.
     private var controls: some View {
         let next = Button { self.next() } label: {
-            Text(nextTitle).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil)
+            Text(regional: nextTitle).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil)
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
@@ -158,7 +158,7 @@ struct OnboardingView: View {
         case .disclaimer: "I understand"
         case .microphone: audio.micPermission == .undetermined ? "Not now" : "Next"
         case .baseline: baselines.isEmpty ? "Skip" : "Next"
-        case .headphones: "Start practising"
+        case .headphones: "Start practising" // shown via Text(regional:)
         default: "Next"
         }
     }
