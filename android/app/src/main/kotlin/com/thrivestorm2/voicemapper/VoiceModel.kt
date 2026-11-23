@@ -113,6 +113,12 @@ class VoiceModel(app: Application) : AndroidViewModel(app) {
         audio.setListening(on)
     }
 
+    /** Stops hear-yourself and capture together (iOS `stopCapture`). */
+    fun stopAudio() {
+        audio.setHearYourself(false)
+        setListening(false)
+    }
+
     private fun sample() {
         if (!audio.isListening.value) { finish(); syncGuard(); return }
         if (start == null) begin()
@@ -184,10 +190,10 @@ class VoiceModel(app: Application) : AndroidViewModel(app) {
     }
 
     // Strain alert actions (SafetyViews on iOS).
-    fun rest() { guard.rest(); setListening(false); syncGuard() }
+    fun rest() { guard.rest(); stopAudio(); syncGuard() }
     fun endRest() { guard.endRest(); syncGuard() }
     fun dismissAlert() { guard.dismiss(); syncGuard() }
-    fun stopForToday() { guard.stopForToday(); setListening(false); syncGuard() }
+    fun stopForToday() { guard.stopForToday(); stopAudio(); syncGuard() }
 
     private fun syncGuard() {
         health = guard.health
@@ -214,7 +220,8 @@ class VoiceModel(app: Application) : AndroidViewModel(app) {
 
     /** Settings ▸ Delete all data. */
     fun deleteAll() {
-        setListening(false)
+        stopAudio()
+        audio.resetPreferences()
         start = null; hz.clear(); noisyTicks = 0; scores.clear(); qualities.clear(); cells.clear()
         guard.endSession()
         noisySession = null

@@ -27,8 +27,10 @@ Requirements (already set up on the dev Mac):
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 ./gradlew :core:test              # accuracy + parity suites
 ./gradlew :app:assembleDebug      # debug APK
-./gradlew :app:assembleRelease    # signed release APK → app/build/outputs/apk/release/
+./gradlew :app:assembleRelease    # signed release APK → app/build.nosync/outputs/apk/release/
 ```
+
+**Build folders end in `.nosync`** (`app/build.nosync`, `core/build.nosync`). Documents is synced by iCloud Drive, which copies files in busy build folders ("Foo 2.class") and breaks the build; iCloud skips `.nosync` names. If a build fails with duplicate classes or a missing class, delete those two folders and build again.
 
 **Toolchain:** AGP 9.5, Gradle 9.9, Kotlin 2.4. Compile SDK 37.1, target SDK 36, minimum SDK 26 (Android 8).
 
@@ -52,7 +54,7 @@ No Play Store account is needed for a couple of testers.
 Google is bringing in developer verification for apps installed outside the Play Store, rolling out by country. If a tester's phone refuses the install, the fallback is a Play Console account ($25 one-time) and its **internal testing** track, which needs no review and takes up to 100 testers by email.
 
 ## Device test checklist (needs real phones)
-The emulator can't test real voice input. Testers: Galaxy A52 (Android 14), Galaxy S22 (Android 16).
+The emulator can't test real voice input or headphones. Testers: Galaxy A52 (Android 14), Galaxy S22 (Android 16), plus the developer's Moto G Play (budget phone, has a headphone jack).
 - [ ] Settings ▸ About ▸ **Microphone** line: "Unprocessed mic" or "Voice-recognition mic", and whether any effects were switched off. Send a screenshot.
 - [ ] Hum a steady note: the note label matches a tuner app, and the dot moves on the grid.
 - [ ] "ee" reads brighter than "oo" on the resonance meter (Vowel ladder exercise).
@@ -63,8 +65,14 @@ The emulator can't test real voice input. Testers: Galaxy A52 (Android 14), Gala
 - [ ] Baseline records, and the hold drill target starts at the baseline note in stage 2.
 - [ ] App lock works with fingerprint, face or PIN, and locks again after leaving the app.
 - [ ] Delete all data returns to onboarding.
+- [ ] **Hear-yourself** (Live ▸ Listen) with wired headphones: you hear your voice, Device delay shows a number (note it per phone), Voice level and Delay sliders work, and there are no crackles.
+- [ ] Hear-yourself refuses to turn on with no headphones, and turns itself off (no speaker squeal) when the headphones are unplugged.
+- [ ] With Bluetooth earbuds: the Route says Bluetooth and the orange banner shows on Live; closing it works.
+- [ ] Headphone volume slider moves with the phone's volume buttons, and turns orange above 75%.
+
+## Hear-yourself (ported, untested on a real phone)
+`AudioCapture` reads the mic in 4 ms chunks and plays them through a low-latency `AudioTrack` (pure delay line × voice level), and regroups the chunks into 1024-sample blocks for analysis, so readings match iOS. The output buffer grows a burst at a time if it underruns. If the output is ever routed to the phone speaker, it's muted at once to prevent feedback. Device delay is measured from the mic and output timestamps (median of recent readings), using the same Low / Noticeable / High thresholds as iOS.
 
 ## Not yet ported
-- **Hear-yourself** (headphone monitoring, delay drills, Bluetooth banner). This needs low-latency audio (AAudio/Oboe) and per-phone latency testing. The route detection is already in `AudioCapture`.
-- Microphone picker. iOS lists the available mics; Android uses the default.
+- Microphone picker: iOS lets you choose a mic; Android always prefers the phone's own mic (the same as iOS "Automatic"). Voice level is therefore one setting, not per mic.
 - The real-voice reference comparison runs here too once the WAVs exist (see `Tools/DSPCheck/reference/README.md`).

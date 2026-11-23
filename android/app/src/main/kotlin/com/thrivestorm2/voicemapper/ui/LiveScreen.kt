@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,6 +52,10 @@ fun LiveScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
     val listening by model.audio.isListening.collectAsState()
     val noisy by model.audio.isNoisy.collectAsState()
     val error by model.audio.lastError.collectAsState()
+    val hearing by model.audio.isHearingYourself.collectAsState()
+    val bluetooth by model.audio.outputIsBluetooth.collectAsState()
+    val bannerDismissed by model.audio.bluetoothBannerDismissed.collectAsState()
+    var showingHearYourself by remember { mutableStateOf(false) }
     val prefs = model.prefs
     val period = HistoryPeriod.entries.firstOrNull { it.name == prefs.historyPeriod } ?: HistoryPeriod.WEEK
 
@@ -57,6 +63,7 @@ fun LiveScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         model.restUntil?.let { RestBanner(it) { model.endRest() } }
+        if (hearing && bluetooth && !bannerDismissed) BluetoothBanner { model.audio.dismissBluetoothBanner() }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         PitchLabel(pitch, listening, prefs.goal)
         val sessions = if (prefs.showOverlay || prefs.showHeat) HeatmapBinner.sessions(model.store.data.sessions, period) else emptyList()
@@ -76,10 +83,17 @@ fun LiveScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
         }
     }
     // Pinned below the scrolling content, like the iOS bottom overlay.
-    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.Center) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
         SpeakButton(listening) { if (listening) model.setListening(false) else requestMic { model.setListening(true) } }
+        OutlinedButton(onClick = { showingHearYourself = true },
+            modifier = Modifier.semantics { contentDescription = if (hearing) "Listen, on" else "Listen, off" }) {
+            val tint = if (hearing) Accent else MaterialTheme.colorScheme.onSurfaceVariant
+            Icon(if (hearing) Icons.Filled.Headphones else Icons.Outlined.Headphones, null, tint = tint)
+            Text("  Listen", color = tint)
+        }
     }
     }
+    if (showingHearYourself) HearYourselfSheet(model.audio, requestMic) { showingHearYourself = false }
 }
 
 @Composable

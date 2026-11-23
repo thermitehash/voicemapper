@@ -23,8 +23,8 @@ android {
         // Android 8.0+: covers the testers' Galaxy A52 (Android 14) and S22 (Android 16).
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "0.2"
     }
 
     signingConfigs {

@@ -38,7 +38,7 @@ class MainActivity : FragmentActivity() {
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             // Like iOS on backgrounding: stop capture, save the open session, lock if enabled.
             override fun onStop(owner: LifecycleOwner) {
-                model.setListening(false)
+                model.stopAudio()
                 model.finish()
                 model.lockIfEnabled()
             }

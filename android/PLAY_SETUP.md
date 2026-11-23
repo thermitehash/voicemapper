@@ -3,11 +3,11 @@
 The upload file is `android/dist/VoiceMapper-android-<version>.aab` (git-ignored). Build it with:
 ```
 export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-cd android && ./gradlew :app:bundleRelease   # → app/build/outputs/bundle/release/app-release.aab
+cd android && ./gradlew :app:bundleRelease   # → app/build.nosync/outputs/bundle/release/app-release.aab
 ```
 Every upload needs a higher `versionCode` in `app/build.gradle.kts`.
 
-If R8 fails with "Type … is defined multiple times" on a file named `… 2.class`, something (usually iCloud Drive syncing Documents) duplicated build files. Delete `app/build` and `core/build`, then build again.
+Builds go to `app/build.nosync` so iCloud Drive doesn't duplicate build files (see README). If R8 still fails with "defined multiple times", delete `app/build.nosync` and `core/build.nosync` and build again.
 
 ## Create app
 | Field | Answer |

@@ -18,7 +18,7 @@ Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES
 - Use Sonnet for routine UI sessions; Opus for DSP sessions (S3, S5, S6, S10).
 
 ## Android port (`android/`)
-Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test` (DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Testers sideload a signed APK (Galaxy A52 / Android 14, Galaxy S22 / Android 16). Hear-yourself is not ported yet. Branch: `claude/android-N`.
+Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test` (DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Testers: Galaxy A52 / Android 14, Galaxy S22 / Android 16, and the user's Moto G Play; distribution is moving to Google Play internal testing (`android/PLAY_SETUP.md`). Hear-yourself is ported but untested on a real phone. Build output goes to `*/build.nosync` because Documents is iCloud-synced. Branch: `claude/android-N`.
 
 ## Stack
 SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
