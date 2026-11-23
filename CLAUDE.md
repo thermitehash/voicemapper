@@ -72,7 +72,7 @@ US, Canada, UK, Australia, New Zealand; English only. Copy is written in British
 
 ## Next session: S16 Buffer, part 2 (Sonnet; Opus if a DSP fix is needed; build 48)
 S18 (accent calibration, Opus) can run before or after this.
-S1–S15 are merged into `main`. TestFlight's latest build is 46 (S16 part 1, internal only). External testers are still on build 45, pending Beta App Review.
+S1–S15 are merged into `main`. TestFlight's latest build is 47 (S17 localisation on top of S16 part 1, internal only; uploaded Nov 23 2026). External testers are still on build 45, pending Beta App Review.
 
 **Start here:** ask the user for feedback from device testing of builds 45/46 and fix what they report. The checks to ask about are in the "What to Test" notes for 45: the plan changes over several days, the hold step moves after 2 passing days, high "ah" stays in the right octave, rough or creaky speech doesn't read an octave low, and "Why this exercise" is clear. If they've recorded the reference WAVs, run the real-voice comparison first.
 
