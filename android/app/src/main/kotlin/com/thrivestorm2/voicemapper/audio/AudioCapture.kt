@@ -64,6 +64,11 @@ class AudioCapture(context: Context) {
     val isNoisy: StateFlow<Boolean> = _isNoisy.asStateFlow()
     private val _isListening = MutableStateFlow(false)
     val isListening: StateFlow<Boolean> = _isListening.asStateFlow()
+    /** Debug builds only: show a made-up reading for store screenshots (the emulator has no voice input). */
+    fun debugShowReading(pitch: PitchReading, resonance: ResonanceReading, quality: VoiceQuality) {
+        _pitch.value = pitch; _resonance.value = resonance; _quality.value = quality; _isListening.value = true
+    }
+
     private val _lastError = MutableStateFlow<String?>(null)
     val lastError: StateFlow<String?> = _lastError.asStateFlow()
     /** Which mic source the phone gave us, for Settings ▸ About this phone. */

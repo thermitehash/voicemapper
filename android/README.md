@@ -39,7 +39,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 adb shell am start -n com.thrivestorm2.voicemapper/.MainActivity \
   --es debugTab history --ez onboardingDone true --ez debugSeed true
 ```
-`debugTab`: live | range | exercises | history | settings. `debugSeed` fills two weeks of made-up sessions. `debugExercise <id>` opens an exercise.
+`debugTab`: live | range | exercises | history | settings. `debugSeed` fills two weeks of made-up sessions. `debugExercise <id>` opens an exercise. `debugGoal 52,59` sets the pitch goal (MIDI low,high). `debugReading true` shows a sample reading on Live and Range, for store screenshots.
 
 ## Installing on a tester's phone (sideloading)
 No Play Store account is needed for a couple of testers.

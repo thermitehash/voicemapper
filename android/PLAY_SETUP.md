@@ -42,5 +42,5 @@ If R8 fails with "Type … is defined multiple times" on a file named `… 2.cla
   • Fully private: no accounts, no internet, no tracking. Nothing leaves your phone.
   VoiceMapper gives estimates to support practice; it is not a medical device.
 - **App icon:** 512×512 PNG (`android/dist/play-icon-512.png`, made from the iOS AppIcon).
-- **Feature graphic:** 1024×500 PNG.
-- **Phone screenshots:** at least 2.
+- **Feature graphic:** `android/dist/play-feature-1024x500.png`.
+- **Phone screenshots:** `android/dist/play-screenshots/` (five, 1080×2160; Play rejects anything taller than 2:1). Regenerate on the emulator with the debug extras `--ez debugSeed true --es debugGoal 52,59 --ez debugReading true` (the last shows a sample G3 reading, since the emulator has no voice input), then fit each onto a 1080×2160 canvas with `sips -Z 2160` and `sips -p 2160 1080 --padColor FEF7FF`.

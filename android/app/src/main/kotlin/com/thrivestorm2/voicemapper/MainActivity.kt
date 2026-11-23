@@ -52,6 +52,13 @@ class MainActivity : FragmentActivity() {
             intent.getStringExtra("debugTab")?.let { initialTab = it }
             if (intent.hasExtra("onboardingDone")) model.prefs.onboardingDone = intent.getBooleanExtra("onboardingDone", true)
             if (intent.getBooleanExtra("debugSeed", false)) DebugSeed.seed(model)
+            intent.getStringExtra("debugGoal")?.split(",")?.mapNotNull { it.trim().toIntOrNull() }?.takeIf { it.size == 2 }?.let {
+                model.prefs.goalLow = it[0]; model.prefs.goalHigh = it[1]
+            }
+            if (intent.getBooleanExtra("debugReading", false)) model.audio.debugShowReading(
+                com.thrivestorm2.voicemapper.core.dsp.PitchReading(196.0, com.thrivestorm2.voicemapper.core.analysis.Note.fromFrequency(196.0)),
+                com.thrivestorm2.voicemapper.core.dsp.ResonanceReading(62.0, 1150.0, listOf(600.0, 1750.0, 2900.0)),
+                com.thrivestorm2.voicemapper.core.dsp.VoiceQuality(8.0, -20.0, 18.0, 20.0, 0.6, 3.5, -24.0))
             intent.getStringExtra("debugExercise")?.let { id -> model.runningExercise = com.thrivestorm2.voicemapper.core.analysis.Exercise.with(id) }
         }
         setContent { AppRoot(model, ::withMicPermission, initialTab) }
