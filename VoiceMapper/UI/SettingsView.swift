@@ -18,8 +18,9 @@ struct SettingsView: View {
     @AppStorage(ResonanceGoal.lowKey) private var resLow = 0.0
     @AppStorage(ResonanceGoal.highKey) private var resHigh = 0.0
 
-    /// ASHA ProFind; opens in Safari. The app itself makes no network calls.
-    private static let therapistURL = URL(string: "https://find.asha.org/pro/")!
+    /// The national directory for the phone's region (ASHA ProFind in the US);
+    /// opens in Safari. The app itself makes no network calls.
+    private let directory = RegionalSpelling.directory()
 
     var body: some View {
         NavigationStack {
@@ -49,14 +50,14 @@ struct SettingsView: View {
                 } header: {
                     Text("Safety")
                 } footer: {
-                    Text("Strain alerts compare clarity, steadiness, pitch and loudness against your baseline (or the first minute of a session) and suggest a rest. They're an estimate, not a diagnosis: if you have pain or lasting hoarseness, see a speech-language pathologist.")
+                    Text(regional: "Strain alerts compare clarity, steadiness, pitch and loudness against your baseline (or the first minute of a session) and suggest a rest. They're an estimate, not a diagnosis: if you have pain or lasting hoarseness, see a speech-language pathologist.")
                 }
                 Section {
-                    Toggle("Colour-blind palette", isOn: $colourBlind)
+                    Toggle(isOn: $colourBlind) { Text(regional: "Colour-blind palette") }
                 } header: {
                     Text("Display")
                 } footer: {
-                    Text("Uses blue, grey and orange for the usually-read-male, ambiguous and usually-read-female zones. Zones always have M / A / F labels too.")
+                    Text(regional: "Uses blue, grey and orange for the usually-read-male, ambiguous and usually-read-female zones. Zones always have M / A / F labels too.")
                 }
                 Section {
                     Toggle("\(AppLock.biometryName) lock", isOn: lockBinding)
@@ -69,10 +70,10 @@ struct SettingsView: View {
                 }
                 Section("About") {
                     NavigationLink("Research sources") { ResearchSourcesView() }
-                    Link(destination: Self.therapistURL) {
+                    Link(destination: directory.url) {
                         Label("Find a voice therapist", systemImage: "arrow.up.right.square")
                     }
-                    .accessibilityHint("Opens the ASHA ProFind directory in Safari")
+                    .accessibilityHint("Opens the \(directory.name) directory in Safari")
                 }
             }
             .navigationTitle("Settings")

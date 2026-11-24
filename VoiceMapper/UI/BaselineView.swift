@@ -24,7 +24,7 @@ struct BaselineView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(RainbowPassage.text).font(.title3)
+                    Text(regional: RainbowPassage.text).font(.title3)
                     Text(RainbowPassage.citation)
                         .font(.caption).foregroundStyle(.secondary)
                 }

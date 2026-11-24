@@ -25,8 +25,8 @@ struct HistoryView: View {
                     if sessions.isEmpty {
                         ContentUnavailableView("No sessions yet",
                                                systemImage: "chart.xyaxis.line",
-                                               description: Text(allSessions.isEmpty
-                                                    ? "Practise on the Live tab and your sessions will appear here."
+                                               description: Text(regional: allSessions.isEmpty
+                                                    ? "Practise on the Live tab and your sessions will appear here." // regional
                                                     : "Nothing recorded in this period. Try a longer one."))
                     } else {
                         heatMap(sessions)
@@ -173,7 +173,7 @@ struct HistoryView: View {
         } header: {
             Text("Sessions").font(.headline).foregroundStyle(.primary)
         } footer: {
-            Text("The colour stripe shows how the whole session typically reads, using every pitch and resonance moment: blue masculine, purple androgynous, pink feminine, with shades in between. It's a typical-listener estimate, not a verdict. Columns: date, length, median note, resonance score. Swipe left on a session to delete it. \(Image(systemName: "speaker.wave.3.fill")) marks a noisy session.")
+            Text(regional: "The colour stripe shows how the whole session typically reads, using every pitch and resonance moment: blue masculine, purple androgynous, pink feminine, with shades in between. It's a typical-listener estimate, not a verdict. Columns: date, length, median note, resonance score. Swipe left on a session to delete it. \(Image(systemName: "speaker.wave.3.fill")) marks a noisy session.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
