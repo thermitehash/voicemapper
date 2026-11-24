@@ -67,14 +67,14 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
 | S16 | Buffer | Bug fixes | — | in progress (build 46 uploaded for internal testers; more fixes from device feedback) |
 | S17 | Localisation | Launch in US, Canada, UK, Australia, NZ (English only): regional spelling, professional names, therapist directories; accent analysis (`docs/LOCALIZATION.md`) | US/UK spelling and the right directory per region | done (build 47) |
-| S18 | Accent calibration | Rhotic F3 gate; found and fixed higher voices reading up to 49 points too dark (pitch-blended LPC order); real-voice tests on Hillenbrand recordings; pitch-independence test; Android port. Accent offsets blocked on data (`docs/LOCALIZATION.md`, `docs/ACCURACY.md`) | Resonance reads alike across accents and pitches | done (not yet on TestFlight) |
+| S18 | Accent calibration | Rhotic F3 gate; found and fixed higher voices reading up to 49 points too dark (pitch-blended LPC order); real-voice tests on Hillenbrand recordings; pitch-independence test; Android port. Accent offsets blocked on data (`docs/LOCALIZATION.md`, `docs/ACCURACY.md`) | Resonance reads alike across accents and pitches | done (build 48) |
 
 ## Launch markets (decided Nov 2026)
 US, Canada, UK, Australia, New Zealand; English only. Copy is written in British spelling; anything with a regional word (see `Analysis/RegionalSpelling.swift`) is shown with `Text(regional:)`. `Tools/MappingTests` fails if a UI literal skips it. Build 47 (S17) carries this; Android isn't ported yet.
 
-## Next session: S16 Buffer, part 2 (Sonnet; Opus if a DSP fix is needed; build 48)
-S18 is done on branch `claude/s18-accent` (PR). It changes resonance readings for higher voices a lot (darker → accurate), so tell testers what to look for in the next build's "What to Test": resonance on "ah"/"eh" at higher pitch, and whether the dot stays put while you only change pitch. Real-voice checks: unpack the Hillenbrand recordings (see `docs/ACCURACY.md` S18) and run `DSPCHECK_H95=<folder> Tools/DSPCheck/run.sh --test`.
-S1–S15 are merged into `main`. TestFlight's latest build is 47 (S17 localisation on top of S16 part 1, internal only; uploaded Nov 23 2026). External testers are still on build 45, pending Beta App Review.
+## Next session: S16 Buffer, part 2 (Sonnet; Opus if a DSP fix is needed; build 49)
+S18 is merged and in build 48. It changes resonance readings for higher voices a lot (darker → accurate), so tell testers what to look for in the next build's "What to Test": resonance on "ah"/"eh" at higher pitch, and whether the dot stays put while you only change pitch. Real-voice checks: unpack the Hillenbrand recordings (see `docs/ACCURACY.md` S18) and run `DSPCHECK_H95=<folder> Tools/DSPCheck/run.sh --test`.
+S1–S15 are merged into `main`. TestFlight's latest build is 48 (S18 on top of S17 and S16 part 1, internal only; uploaded Nov 23 2026). External testers are still on build 45, pending Beta App Review.
 
 **Start here:** ask the user for feedback from device testing of builds 45/46 and fix what they report. The checks to ask about are in the "What to Test" notes for 45: the plan changes over several days, the hold step moves after 2 passing days, high "ah" stays in the right octave, rough or creaky speech doesn't read an octave low, and "Why this exercise" is clear. If they've recorded the reference WAVs, run the real-voice comparison first.
 
@@ -101,4 +101,4 @@ S1–S15 are merged into `main`. TestFlight's latest build is 47 (S17 localisati
 
 **Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>` (warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown), `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
 
-**Wrap-up:** build for the simulator, run both test suites, bump to build 48, archive and upload, open a PR from `claude/s16-buffer-2`, merge it, then mark S16 done.
+**Wrap-up:** build for the simulator, run both test suites, bump to build 49, archive and upload, open a PR from `claude/s16-buffer-2`, merge it, then mark S16 done.
