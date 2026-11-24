@@ -15,6 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,10 +41,15 @@ enum class AppTab(val title: String, val icon: ImageVector) {
 fun AppRoot(model: VoiceModel, requestMic: (() -> Unit) -> Unit, initialTab: String? = null) {
     VoiceMapperTheme {
         CompositionLocalProvider(LocalColourBlind provides model.prefs.colourBlind) {
-            Box(Modifier.fillMaxSize()) {
-                if (model.prefs.onboardingDone) RootTabs(model, requestMic, initialTab)
-                else OnboardingScreen(model, requestMic)
-                if (model.isLocked) LockScreen(model)
+            // Surface gives screens outside the Scaffold (onboarding, lock) the
+            // theme background and text colour; without it dark mode showed the
+            // white window behind onboarding.
+            Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Box(Modifier.fillMaxSize()) {
+                    if (model.prefs.onboardingDone) RootTabs(model, requestMic, initialTab)
+                    else OnboardingScreen(model, requestMic)
+                    if (model.isLocked) LockScreen(model)
+                }
             }
         }
     }

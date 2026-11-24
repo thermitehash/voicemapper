@@ -46,6 +46,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -152,7 +155,17 @@ fun PitchResonanceGrid(
                             )
                         }
                         .pointerInput(Unit) { detectTapGestures { onResonanceGoal(0.0, 0.0) } }
-                        .semantics { contentDescription = gridDescription(pitch, resonance) },
+                        // TalkBack: value as state (re-read while focused, like iOS
+                        // .updatesFrequently) and actions in place of the drag.
+                        .semantics {
+                            contentDescription = "Pitch and resonance grid"
+                            stateDescription = gridState(pitch, resonance, resonanceGoal)
+                            customActions = listOf(
+                                CustomAccessibilityAction("Move resonance goal brighter") { moveGoal(resonanceGoal, resonance, 5.0, onResonanceGoal); true },
+                                CustomAccessibilityAction("Move resonance goal darker") { moveGoal(resonanceGoal, resonance, -5.0, onResonanceGoal); true },
+                                CustomAccessibilityAction("Clear resonance goal") { onResonanceGoal(0.0, 0.0); true },
+                            )
+                        },
                 ) {
                     @Suppress("UNUSED_EXPRESSION") frame
                     val w = size.width; val h = size.height
@@ -221,11 +234,29 @@ private fun hint(pitch: PitchReading?, resonance: ResonanceReading?, goal: Reson
     }
 }
 
-private fun gridDescription(pitch: PitchReading?, resonance: ResonanceReading?): String {
-    pitch ?: return "Pitch and resonance grid. No reading"
-    var text = "Pitch and resonance grid. ${pitch.note.name}"
-    resonance?.let { text += ", resonance ${swiftRound(it.score)} out of 100" }
+/** iOS GridView.accessibilityValue: the voice against the resonance goal. */
+private fun gridState(pitch: PitchReading?, resonance: ResonanceReading?, goal: ResonanceGoal?): String {
+    val goalText = goal?.let { "Resonance goal ${swiftRound(it.low)} to ${swiftRound(it.high)}" }
+    if (pitch == null) return listOfNotNull("No reading", goalText).joinToString(". ")
+    var text = pitch.note.name
+    resonance?.let { r ->
+        text += ", resonance ${swiftRound(r.score)} out of 100"
+        if (goal != null) text += when (goal.direction(r.score)) {
+            ResonanceGoal.Direction.BRIGHTER -> ", goal is brighter"
+            ResonanceGoal.Direction.DARKER -> ", goal is darker"
+            null -> ", in your resonance goal"
+        }
+    }
+    if (goalText != null) text += ". $goalText"
     return text
+}
+
+/** iOS accessibilityAdjustableAction: shift the goal band (20 wide if none yet). */
+private fun moveGoal(goal: ResonanceGoal?, resonance: ResonanceReading?, step: Double, set: (Double, Double) -> Unit) {
+    val width = goal?.let { it.high - it.low } ?: 20.0
+    val centre = ((goal?.let { (it.low + it.high) / 2 } ?: resonance?.score ?: 50.0) + step)
+        .coerceIn(width / 2, 100 - width / 2)
+    set(centre - width / 2, centre + width / 2)
 }
 
 private const val ZONE_CELLS = 64

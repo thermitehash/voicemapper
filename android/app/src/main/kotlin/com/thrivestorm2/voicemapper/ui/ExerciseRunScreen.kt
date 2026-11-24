@@ -56,6 +56,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -336,8 +338,9 @@ private fun BasisView(basis: Exercise.Basis) {
 
 @Composable
 private fun ResonanceMeter(score: Double?, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().semantics(mergeDescendants = true) {
-        contentDescription = score?.let { "Resonance ${swiftRound(it)} of 100, darker to brighter" } ?: "Resonance: no reading"
+    Column(modifier.fillMaxWidth().clearAndSetSemantics {
+        contentDescription = "Resonance"
+        stateDescription = score?.let { "${swiftRound(it)} of 100, darker to brighter" } ?: "No reading"
     }, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BoxWithConstraints(Modifier.fillMaxWidth().height(18.dp), contentAlignment = Alignment.CenterStart) {
             Box(Modifier.fillMaxWidth().height(8.dp).background(

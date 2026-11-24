@@ -48,7 +48,7 @@ The main route is **Google Play internal testing**: see `PLAY_SETUP.md`. Testers
 
 ### Sideloading (fallback)
 No Play Store account is needed for this.
-1. Send them the APK from `dist/` (e.g. `VoiceMapper-android-0.2.apk`), by email, Google Drive, or whatever they use.
+1. Send them the APK from `dist/` (e.g. `VoiceMapper-android-0.3.apk`), by email, Google Drive, or whatever they use.
 2. On the phone, open the file. Android asks to allow installs from that app (Files, Gmail, Chrome…): tap **Settings ▸ Allow from this source**, go back, then **Install**.
 3. Samsung phones may show "Auto Blocker" (One UI 6+). Turn it off for the install under **Settings ▸ Security and privacy ▸ Auto Blocker**, then turn it back on.
 4. Google Play Protect may warn about an unknown developer. Tap **More details ▸ Install anyway**.
