@@ -88,14 +88,16 @@ fun BaselineScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit, onDone: 
         }
     }
 
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp),
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("Baseline", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
             TextButton(onClick = { cancel(); onDone() }) { Text("Done") }
         }
         Text("Read this passage aloud in your natural, comfortable voice. This is your reference point, not a target.", textAlign = TextAlign.Center)
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // The whole passage (~2 min aloud) outlasts the 30 s recording; it scrolls
+        // while the timer and buttons stay in view (iOS BaselineView).
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(rs(RainbowPassage.TEXT), style = MaterialTheme.typography.titleLarge)
             Text(RainbowPassage.CITATION, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

@@ -16,7 +16,7 @@ class ParityTest {
     private val ios = File(System.getProperty("voicemapper.iosRoot") ?: "../VoiceMapper")
     private fun swift(path: String) = File(ios, path).readText()
     /** Swift string literal form of a Kotlin string. */
-    private fun literal(s: String) = s.replace("\\", "\\\\").replace("\"", "\\\"")
+    private fun literal(s: String) = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
 
     @Test
     fun exerciseWordingMatchesIos() {

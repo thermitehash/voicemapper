@@ -97,12 +97,15 @@ fun OnboardingScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (step > 0) TextButton(onClick = { step-- }) { Text("Back") }
             Spacer(Modifier.weight(1f))
-            Button(onClick = { if (step == 5) model.prefs.onboardingDone = true else step++ }) {
-                Text(when (step) {
-                    0 -> "Get started"; 1 -> "I understand"; 2 -> if (micGranted) "Next" else "Not now"
-                    4 -> if (baseline == null) "Skip" else "Next"; 5 -> rs("Start practising"); else -> "Next"
-                })
+            val label = when (step) {
+                0 -> "Get started"; 1 -> "I understand"; 2 -> if (micGranted) "Next" else "Not now"
+                4 -> if (baseline == null) "Skip" else "Next"; 5 -> rs("Start practising"); else -> "Next"
             }
+            val onNext: () -> Unit = { if (step == 5) model.prefs.onboardingDone = true else step++ }
+            // Goal and baseline are optional: grey but tappable until done (iOS OnboardingView).
+            val muted = (step == 3 && model.prefs.goal == null) || (step == 4 && baseline == null)
+            if (muted) OutlinedButton(onClick = onNext) { Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            else Button(onClick = onNext) { Text(label) }
         }
     }
 }

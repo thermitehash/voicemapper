@@ -11,6 +11,8 @@ struct OnboardingView: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage(Self.doneKey) private var done = false
     @Query private var baselines: [Baseline]
+    @AppStorage(GoalRange.lowKey) private var goalLow = 0
+    @AppStorage(GoalRange.highKey) private var goalHigh = 0
     @State private var step = Self.initialStep
 
     /// Debug builds accept `-debugOnboardingStep 3` to open on a step (for screenshots).
@@ -129,10 +131,21 @@ struct OnboardingView: View {
     /// Side by side normally; stacked full-width at accessibility text sizes,
     /// capped so the buttons leave room for the page text.
     private var controls: some View {
-        let next = Button { self.next() } label: {
-            Text(regional: nextTitle).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil)
+        let label = Text(regional: nextTitle).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil)
+        // Goal and baseline are optional: the button stays tappable but is
+        // grey until the step is done, which nudges without forcing.
+        let next = Group {
+            if nextIsMuted {
+                Button { self.next() } label: { label }
+                    .buttonStyle(.bordered)
+                    .tint(.secondary)
+                    .accessibilityHint(step == .goal ? "Optional. Picking a goal first is recommended."
+                                                     : "Optional. You can record a baseline later in Settings.")
+            } else {
+                Button { self.next() } label: { label }
+                    .buttonStyle(.borderedProminent)
+            }
         }
-        .buttonStyle(.borderedProminent)
         .controlSize(.large)
         return Group {
             if typeSize.isAccessibilitySize {
@@ -150,6 +163,15 @@ struct OnboardingView: View {
         }
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .padding()
+    }
+
+    /// Optional step not done yet: goal not picked, or no baseline recorded.
+    private var nextIsMuted: Bool {
+        switch step {
+        case .goal: GoalRange(low: goalLow, high: goalHigh) == nil
+        case .baseline: baselines.isEmpty
+        default: false
+        }
     }
 
     private var nextTitle: String {

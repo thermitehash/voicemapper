@@ -23,11 +23,18 @@ struct BaselineView: View {
                 Text("Read this passage aloud in your natural, comfortable voice. This is your reference point, not a target.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(regional: RainbowPassage.text).font(.title3)
-                    Text(RainbowPassage.citation)
-                        .font(.caption).foregroundStyle(.secondary)
+                // The whole passage (~2 min aloud) is longer than the 30 s
+                // recording, so nobody runs out of text; it scrolls while the
+                // timer and buttons stay in view.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(regional: RainbowPassage.text).font(.title3)
+                        Text(RainbowPassage.citation)
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .scrollIndicators(.visible)
                 if isRecording {
                     ProgressView(value: elapsed, total: Self.length)
                         .accessibilityLabel("Recording")
@@ -48,7 +55,6 @@ struct BaselineView: View {
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
-                Spacer()
             }
             .padding()
             .navigationTitle("Baseline")

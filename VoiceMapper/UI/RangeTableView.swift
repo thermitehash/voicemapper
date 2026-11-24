@@ -2,10 +2,13 @@ import SwiftUI
 
 struct RangeTableView: View {
     @Environment(AudioEngine.self) private var audio
+    @Environment(\.colorScheme) private var colorScheme
     @AppStorage(GoalRange.lowKey) private var goalLow = 0
     @AppStorage(GoalRange.highKey) private var goalHigh = 0
 
     private var goal: GoalRange? { GoalRange(low: goalLow, high: goalHigh) }
+    /// Tints that read on white wash out on black, so dark mode uses stronger ones.
+    private var dark: Bool { colorScheme == .dark }
 
     /// First tap sets a one-note goal, a second tap on another row stretches it
     /// to a range, tapping the lone note again clears it, and any tap on an
@@ -24,7 +27,12 @@ struct RangeTableView: View {
 
     /// Row of the note being sung, nil when silent.
     private var currentID: Int? {
-        audio.pitch.map { RangeTable.rowID(for: $0.note) }
+        #if DEBUG
+        // `-debugRangeMidi 57` highlights a row without singing (screenshots).
+        let debug = UserDefaults.standard.integer(forKey: "debugRangeMidi")
+        if debug > 0 { return RangeTable.rowID(for: Note(midi: debug)) }
+        #endif
+        return audio.pitch.map { RangeTable.rowID(for: $0.note) }
     }
 
     var body: some View {
@@ -40,8 +48,20 @@ struct RangeTableView: View {
                         .frame(maxHeight: .infinity)
                         .background {
                             ZStack {
-                                if goal?.contains(midi: row.id) == true { Color.teal.opacity(0.18) }
-                                if row.id == currentID { Color.accentColor.opacity(0.2) }
+                                if goal?.contains(midi: row.id) == true { Color.teal.opacity(dark ? 0.4 : 0.18) }
+                                if row.id == currentID { Color.accentColor.opacity(dark ? 0.5 : 0.25) }
+                            }
+                        }
+                        // Edge stripe marks the goal without relying on the
+                        // tint alone (dark mode, colour-blind palette).
+                        .overlay(alignment: .leading) {
+                            if goal?.contains(midi: row.id) == true {
+                                Rectangle().fill(Color.teal).frame(width: 5)
+                            }
+                        }
+                        .overlay {
+                            if row.id == currentID {
+                                Rectangle().strokeBorder(Color.accentColor, lineWidth: dark ? 2.5 : 2)
                             }
                         }
                         .contentShape(Rectangle())

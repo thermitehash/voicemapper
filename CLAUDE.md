@@ -69,7 +69,7 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S16 | Buffer | Bug fixes | — | in progress (build 46 uploaded for internal testers; more fixes from device feedback) |
 | S17 | Localisation | Launch in US, Canada, UK, Australia, NZ (English only): regional spelling, professional names, therapist directories; accent analysis (`docs/LOCALIZATION.md`) | US/UK spelling and the right directory per region | done (build 47) |
 | S18 | Accent calibration | Rhotic F3 gate; found and fixed higher voices reading up to 49 points too dark (pitch-blended LPC order); real-voice tests on Hillenbrand recordings; pitch-independence test; Android port. Accent offsets blocked on data (`docs/LOCALIZATION.md`, `docs/ACCURACY.md`) | Resonance reads alike across accents and pitches | done (build 48) |
-| S19 | Evidence and Android spelling | Evidence notes name who each study covered (trans women for the resonance work); verified citations in `docs/LOCALIZATION.md`; "oo" and "ee" step wording; Android regional spelling, professional names and therapist directory (`core/analysis/RegionalSpelling.kt`, `rs()` in the app) | None needed beyond the suites | done (not on TestFlight; ships with the next build) |
+| S19 | Evidence and Android spelling | Evidence notes name who each study covered (trans women for the resonance work); verified citations in `docs/LOCALIZATION.md`; "oo" and "ee" step wording; Android regional spelling, professional names and therapist directory (`core/analysis/RegionalSpelling.kt`, `rs()` in the app); full Rainbow Passage (346 words, scrolls on the baseline screen); onboarding goal and baseline buttons grey until done (still tappable); Range goal band and live-note highlight readable in dark mode | None needed beyond the suites | done (not on TestFlight; ships with the next build) |
 
 ## Launch markets (decided Nov 2026)
 US, Canada, UK, Australia, New Zealand; English only. Copy is written in British spelling; anything with a regional word (see `Analysis/RegionalSpelling.swift`) is shown with `Text(regional:)`. `Tools/MappingTests` fails if a UI literal skips it. Build 47 (S17) carries this; Android isn't ported yet.
@@ -101,6 +101,6 @@ S1–S15 are merged into `main`. TestFlight's latest build is 48 (S18 on top of 
 - Stage keys: `progression.stage`, `progression.stageStart`, `progression.holdStep`.
 - Keep gender-related lists alphabetical.
 
-**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>` (warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown), `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`.
+**Debug helpers:** `-debugTab <live|range|exercises|history|settings>`, `-debugExercise <id>` (warmup, hums, slides, hold, forwardback, vowels, phrases, reading, intonation, weight, cooldown), `-debugOnboardingStep <0-5>`, `-onboarding.done YES`, `-display.colourBlindPalette YES`, `-progression.stage <1-6>`, `-debugRangeMidi <midi>` (highlights a Range row without singing), `-goalLowMidi`/`-goalHighMidi <midi>`.
 
 **Wrap-up:** build for the simulator, run both test suites, bump to build 49, archive and upload, open a PR from `claude/s16-buffer-2`, merge it, then mark S16 done.
