@@ -7,7 +7,14 @@ struct SettingsView: View {
     @Environment(SessionRecorder.self) private var recorder
     @Environment(AppLock.self) private var lock
     @Query private var baselines: [Baseline]
-    @State private var showingBaseline = false
+    /// Debug builds accept `-debugBaseline YES` to open the baseline sheet (screenshots).
+    @State private var showingBaseline = {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "debugBaseline")
+        #else
+        false
+        #endif
+    }()
     @State private var confirmingDelete = false
     @AppStorage(StrainGuard.alertsKey) private var strainAlerts = true
     @AppStorage(StrainGuard.capKey) private var capMinutes = StrainGuard.defaultCapMinutes

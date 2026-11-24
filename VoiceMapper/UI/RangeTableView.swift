@@ -103,6 +103,8 @@ private struct CurrentNote: View {
         }
         .font(.title2.weight(.semibold))
         .monospacedDigit()
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.updatesFrequently)
     }
 }
 

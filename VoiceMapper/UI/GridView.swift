@@ -68,6 +68,25 @@ struct GridView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Pitch and resonance grid")
             .accessibilityValue(accessibilityValue)
+            // VoiceOver re-reads the value as the voice moves while focused.
+            .accessibilityAddTraits(.updatesFrequently)
+            .accessibilityHint("Swipe up or down to move your resonance goal brighter or darker.")
+            // The drag that sets a resonance goal isn't available to VoiceOver,
+            // so swipes move a goal band (20 points wide if none is set yet).
+            .accessibilityAdjustableAction { direction in
+                let current = ResonanceGoal(low: resLow, high: resHigh)
+                let width = current.map { $0.high - $0.low } ?? 20
+                var centre = current.map { ($0.low + $0.high) / 2 } ?? (resonance?.score ?? 50)
+                switch direction {
+                case .increment: centre += 5
+                case .decrement: centre -= 5
+                @unknown default: break
+                }
+                centre = min(100 - width / 2, max(width / 2, centre))
+                resLow = centre - width / 2
+                resHigh = centre + width / 2
+            }
+            .accessibilityAction(named: "Clear resonance goal") { resLow = 0; resHigh = 0 }
 
             HStack {
                 Text("Darker")
@@ -313,12 +332,22 @@ struct GridView: View {
     }
 
     private var accessibilityValue: String {
-        guard let pitch else { return "No reading" }
+        let goal = ResonanceGoal(low: resLow, high: resHigh)
+        let goalText = goal.map { "Resonance goal \(Int($0.low.rounded())) to \(Int($0.high.rounded()))" }
+        guard let pitch else { return ["No reading", goalText].compactMap { $0 }.joined(separator: ". ") }
         var text = "\(pitch.note.name)"
         if let resonance {
             let score = Int(resonance.score.rounded())
             text += ", resonance \(score) out of 100"
+            if let goal {
+                switch goal.direction(of: resonance.score) {
+                case .brighter: text += ", goal is brighter"
+                case .darker: text += ", goal is darker"
+                case nil: text += ", in your resonance goal"
+                }
+            }
         }
+        if let goalText { text += ". \(goalText)" }
         return text
     }
 }

@@ -9,8 +9,17 @@ struct BaselineView: View {
     @Environment(\.dismiss) private var dismiss
 
     private static let length = 30.0
-    @State private var elapsed = 0.0
-    @State private var isRecording = false
+    /// Debug builds accept `-debugBaselineRecording YES` to show the recording
+    /// layout without a mic (screenshots).
+    private static var debugRecording: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "debugBaselineRecording")
+        #else
+        false
+        #endif
+    }
+    @State private var elapsed = Self.debugRecording ? 12 : 0.0
+    @State private var isRecording = Self.debugRecording
     @State private var hz: [Double] = []
     @State private var scores: [Double] = []
     @State private var qualities: [VoiceQuality] = []
@@ -23,6 +32,7 @@ struct BaselineView: View {
                 Text("Read this passage aloud in your natural, comfortable voice. This is your reference point, not a target.")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)  // never truncated by the passage below
                 // The whole passage (~2 min aloud) is longer than the 30 s
                 // recording, so nobody runs out of text; it scrolls while the
                 // timer and buttons stay in view.
