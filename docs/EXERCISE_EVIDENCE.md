@@ -23,6 +23,29 @@ Every exercise in `Analysis/Exercises.swift` has a `basis` (strength, one line, 
 | Lighter ↔ heavier (new) | 6 | **Limited research** | "Vocal weight" is mainly a voice-training idea. A model study found spectral shape has a moderate effect on gender perception (Zhang, Zhang & Kreiman 2022). Breathiness findings are mixed (Leung, Oates & Chan 2018). No drill has been tested directly. The instructions warn never to press or squeeze. |
 | Cool-down | all | **Limited research** | Singers report benefit, but objective measures haven't shown a clear effect (Ragan 2016). It uses the same SOVT sounds as the warm-up. |
 
+## Who was studied (S19)
+The in-app notes now name the group each study covered, following the data rule in `CLAUDE.md`. Populations were checked against abstracts and index records in Nov 2026.
+
+| Source | Who |
+|---|---|
+| Carew, Dacakis & Oates 2007 | 10 trans women (oral resonance therapy) |
+| Kawitzky & McAllister 2020 | Trans women (11 per the authors' poster) with a cis men comparison group |
+| Hancock, Colton & Douglas 2014 | 12 cis men, 12 cis women, 6 trans men, 14 trans women as speakers; listeners judged recordings |
+| Davies, Papp & Antoni 2015 | Clinical guidance for trans and gender-diverse people, both directions |
+| Leung, Oates & Chan 2018 | Meta-analysis of listener-perception studies |
+| Stemple et al. 1994 | 35 women with healthy voices (graduate students) |
+| Verdolini-Marston et al. 1995 | 13 women with vocal nodules |
+| Kapsner-Smith et al. 2015 | Adults with voice problems |
+| Yiu, Lo & Barrett 2017 | Review of resonant voice therapy for voice disorders |
+| Titze 2006; Boone & McFarlane 1993 | Theory and critical reviews, no study group |
+| Ragan 2016 | Singers |
+| Zhang, Zhang & Kreiman 2022 | Computer voice model |
+
+**What this means for the main audience (trans women, see `CLAUDE.md`):**
+- **Resonance:** the brightening work (forward ↔ back, vowel ladder) is supported by studies of trans women.
+- **Warm-up and hums:** the evidence comes from voice-disorder treatment in mostly cis women, not from gender-affirming training.
+- **Darkening resonance:** the darker direction has the same physics but no trial in trans men. The forward ↔ back note now says so.
+
 ## Safety wording kept in every exercise
 Comfortable volume; stop if anything hurts or feels scratchy; strain alerts and the daily cap stay on. Davies et al. 2015 (Summary of Recommendations, item 4) advises against self-guided voice change without at least one professional assessment. The Exercises tab now says so under the stage path.
 

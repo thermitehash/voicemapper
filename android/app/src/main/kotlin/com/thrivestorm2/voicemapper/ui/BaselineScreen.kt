@@ -96,7 +96,7 @@ fun BaselineScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit, onDone: 
         }
         Text("Read this passage aloud in your natural, comfortable voice. This is your reference point, not a target.", textAlign = TextAlign.Center)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(RainbowPassage.TEXT, style = MaterialTheme.typography.titleLarge)
+            Text(rs(RainbowPassage.TEXT), style = MaterialTheme.typography.titleLarge)
             Text(RainbowPassage.CITATION, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (recording) {

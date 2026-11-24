@@ -92,7 +92,7 @@ fun ExercisesScreen(model: VoiceModel) {
         }
         item {
             Card { StagePathHeader(stage, status) { stage.next?.let { model.chooseStage(it) } } }
-            Footer("Stages are suggestions. You can move to any stage in Settings ▸ Goal. Voice guidelines recommend seeing a speech-language pathologist at least once before changing your voice on your own.")
+            Footer(rs("Stages are suggestions. You can move to any stage in Settings ▸ Goal. Voice guidelines recommend seeing a speech-language pathologist at least once before changing your voice on your own."))
         }
         item { SectionHeader("Today's plan") }
         if (plan.items.isEmpty()) {
@@ -134,7 +134,7 @@ private fun ExerciseRow(exercise: Exercise, isDone: Boolean, needsWarmUp: Boolea
         Column(Modifier.weight(1f)) {
             Text(exercise.title + if (exercise.isWarmUp) " (required)" else "",
                 fontWeight = if (exercise.isWarmUp && needsWarmUp) FontWeight.SemiBold else FontWeight.Normal)
-            Text(if (role == Progression.PlanItem.Role.REVIEW) "Review · ${exercise.summary}" else exercise.summary,
+            Text(rs(if (role == Progression.PlanItem.Role.REVIEW) "Review · ${exercise.summary}" else exercise.summary),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (isDone) Icon(Icons.Filled.CheckCircle, "Done today", tint = Green)
@@ -170,7 +170,7 @@ private fun StagePathHeader(stage: Stage, status: Progression.Status, moveOn: ()
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(if (c.met) Icons.Filled.CheckCircle else Icons.Outlined.Circle, null, tint = if (c.met) Green else muted,
                         modifier = Modifier.size(20.dp))
-                    Text(c.text, style = MaterialTheme.typography.bodyMedium)
+                    Text(rs(c.text), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

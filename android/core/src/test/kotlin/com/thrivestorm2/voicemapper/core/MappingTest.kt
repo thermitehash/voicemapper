@@ -22,6 +22,7 @@ class MappingTest {
     fun mappingSuite() {
         testNote(); testZones(); testResonance(); testHeatmap(); testGoals()
         testStrain(); testExerciseLog(); testProgression(); testExercises()
+        testRegionalSpelling(c)
         c.finish()
     }
 
@@ -362,4 +363,54 @@ class MappingTest {
             c.expect(n >= 2, "stage $stage has 2+ exercises, got $n")
         }
     }
+
+    /** iOS MappingTests `testRegionalSpelling`. */
+    private fun testRegionalSpelling(c: Checks) {
+        c.group("RegionalSpelling (US / Canada / UK, AU, NZ)")
+        val r = RegionalSpelling
+        c.expect(r.variant(listOf("en-US"), "GB") == RegionalSpelling.Variant.AMERICAN, "en-US → American")
+        c.expect(r.variant(listOf("en-CA"), "US") == RegionalSpelling.Variant.CANADIAN, "en-CA → Canadian")
+        c.expect(r.variant(listOf("en-GB"), "US") == RegionalSpelling.Variant.BRITISH, "en-GB → British")
+        c.expect(r.variant(listOf("en-AU"), "US") == RegionalSpelling.Variant.AUSTRALIAN, "en-AU → Australian")
+        c.expect(r.variant(listOf("en-NZ"), "US") == RegionalSpelling.Variant.NEW_ZEALAND, "en-NZ → New Zealand")
+        c.expect(r.variant(listOf("en"), "CA") == RegionalSpelling.Variant.CANADIAN, "en + region CA → Canadian")
+        c.expect(r.variant(emptyList(), null) == RegionalSpelling.Variant.BRITISH, "unknown → British")
+
+        val src = "Practise the colour drill; you've practised. Recognised by my mum. Grey, centre, Control Centre."
+        for (v in listOf(RegionalSpelling.Variant.BRITISH, RegionalSpelling.Variant.AUSTRALIAN, RegionalSpelling.Variant.NEW_ZEALAND))
+            c.expect(r.apply(src, v) == src, "$v spelling unchanged")
+        c.expect(r.apply(src, RegionalSpelling.Variant.AMERICAN) ==
+            "Practice the color drill; you've practiced. Recognized by my mom. Gray, center, Control Center.") { "American: ${r.apply(src, RegionalSpelling.Variant.AMERICAN)}" }
+        c.expect(r.apply(src, RegionalSpelling.Variant.CANADIAN) ==
+            "Practise the colour drill; you've practised. Recognized by my mom. Grey, centre, Control Centre.") { "Canadian: ${r.apply(src, RegionalSpelling.Variant.CANADIAN)}" }
+        c.expect(r.apply("Daily practice cap, maximum, summer, Colour-blind", RegionalSpelling.Variant.AMERICAN) ==
+            "Daily practice cap, maximum, summer, Color-blind", "whole words only")
+        val slp = "Not a substitute for a speech-language pathologist."
+        c.expect(r.apply(slp, RegionalSpelling.Variant.CANADIAN) == slp, "Canada keeps speech-language pathologist")
+        c.expect(r.apply(slp, RegionalSpelling.Variant.BRITISH) == "Not a substitute for a speech and language therapist.", "UK term")
+        c.expect(r.apply(slp, RegionalSpelling.Variant.AUSTRALIAN) == "Not a substitute for a speech pathologist.", "AU term")
+        c.expect(r.apply(slp, RegionalSpelling.Variant.NEW_ZEALAND) == "Not a substitute for a speech-language therapist.", "NZ term")
+        for (region in listOf("US", "CA", "GB", "AU", "NZ", null))
+            c.expect(r.directory(region).url.startsWith("https://"), "directory link for ${region ?: "unknown"}")
+
+        val british = Regex("\\b([Pp]ractis|[Cc]olour|[Cc]entre|[Rr]ecognis|[Gg]rey\\b|[Mm]um\\b|speech-language patholog)")
+        val texts = Exercise.all.flatMap { e ->
+            listOf(e.title, e.summary, e.basis.summary, e.basis.strength.label) + ((e.kind as? Exercise.Kind.Guided)?.steps?.map { it.text } ?: emptyList())
+        } + RainbowPassage.TEXT
+        for (t in texts) {
+            val us = r.apply(t, RegionalSpelling.Variant.AMERICAN)
+            c.expect(british.find(us) == null) { "British form left for US: ${us.take(60)}" }
+        }
+
+        // UI literals with a British form must go through rs() (or carry a "// regional" note).
+        val ui = java.io.File(System.getProperty("voicemapper.appUi") ?: return)
+        val files = ui.listFiles { f -> f.extension == "kt" }.orEmpty()
+        c.expect(files.size > 5, "found app UI sources")
+        for (f in files) f.readLines().forEachIndexed { i, line ->
+            if ("rs(" in line || "regional" in line || line.trim().startsWith("//") || "\"" !in line) return@forEachIndexed
+            val literals = line.split('"').filterIndexed { k, _ -> k % 2 == 1 }.joinToString(" ")
+            c.expect(british.find(literals) == null) { "${f.name}:${i + 1} shows British spelling without rs()" }
+        }
+    }
+
 }

@@ -91,7 +91,7 @@ fun HistoryScreen(model: VoiceModel) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.AutoMirrored.Filled.ShowChart, null, Modifier.size(48.dp), tint = muted)
                     Text("No sessions yet", style = MaterialTheme.typography.titleMedium)
-                    Text(if (all.isEmpty()) "Practise on the Live tab and your sessions will appear here."
+                    Text(if (all.isEmpty()) rs("Practise on the Live tab and your sessions will appear here.")
                         else "Nothing recorded in this period. Try a longer one.", color = muted, textAlign = TextAlign.Center)
                 }
             }
@@ -108,7 +108,7 @@ fun HistoryScreen(model: VoiceModel) {
         item { Text("Sessions", style = MaterialTheme.typography.titleMedium) }
         items(sessions, key = { it.id }) { s -> SessionRow(s) { confirmDelete = s } }
         item {
-            Text("The colour stripe shows how the whole session typically reads, using every pitch and resonance moment: blue masculine, purple androgynous, pink feminine, with shades in between. It's a typical-listener estimate, not a verdict. Columns: date, length, median note, resonance score. Tap the bin to delete a session. The speaker icon marks a noisy session.",
+            Text(rs("The colour stripe shows how the whole session typically reads, using every pitch and resonance moment: blue masculine, purple androgynous, pink feminine, with shades in between. It's a typical-listener estimate, not a verdict. Columns: date, length, median note, resonance score. Tap the bin to delete a session. The speaker icon marks a noisy session."),
                 style = MaterialTheme.typography.bodySmall, color = muted)
         }
     }

@@ -66,7 +66,7 @@ fun OnboardingScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
                     Text("Everything stays on this phone. Nothing is uploaded, and no audio is ever saved.")
                 }
                 1 -> Page(Icons.Filled.MedicalServices, "Before you start") {
-                    Text("VoiceMapper is a practice tool, not medical advice, and not a substitute for a speech-language pathologist.")
+                    Text(rs("VoiceMapper is a practice tool, not medical advice, and not a substitute for a speech-language pathologist."))
                     Text("Its strain alerts are estimates, not a diagnosis. Stop if anything hurts or feels scratchy, and see a professional if you have pain or hoarseness that lasts.")
                     Text("Working with a voice therapist who specialises in gender-affirming voice care is the safest way to train. Settings has a link to help you find one.")
                 }
@@ -89,8 +89,8 @@ fun OnboardingScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
                     Text("You can skip this and record it later in Settings.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 else -> Page(Icons.Filled.Headphones, "Hearing yourself") {
-                    Text("Hearing your own voice through headphones while you practise is coming to the Android version later. On iPhone, wired headphones work best: Bluetooth adds a delay of about 150–250 ms.")
-                    Text("The mic picks up your voice fine without headphones. Practise somewhere quiet, at a comfortable volume, and keep sessions short.")
+                    Text(rs("Hearing your own voice through headphones while you practise is coming to the Android version later. On iPhone, wired headphones work best: Bluetooth adds a delay of about 150–250 ms."))
+                    Text(rs("The mic picks up your voice fine without headphones. Practise somewhere quiet, at a comfortable volume, and keep sessions short."))
                 }
             }
         }
@@ -100,7 +100,7 @@ fun OnboardingScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
             Button(onClick = { if (step == 5) model.prefs.onboardingDone = true else step++ }) {
                 Text(when (step) {
                     0 -> "Get started"; 1 -> "I understand"; 2 -> if (micGranted) "Next" else "Not now"
-                    4 -> if (baseline == null) "Skip" else "Next"; 5 -> "Start practising"; else -> "Next"
+                    4 -> if (baseline == null) "Skip" else "Next"; 5 -> rs("Start practising"); else -> "Next"
                 })
             }
         }
