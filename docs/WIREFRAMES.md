@@ -1,5 +1,12 @@
 # VoiceMapper — approved wireframes
 
+**As built (Nov 2026):** the screens follow these wireframes, with these changes since approval:
+- **Onboarding** is six steps (welcome, disclaimer, mic, goal, baseline, headphones). On the goal and baseline steps the Next/Skip button is grey but still tappable until a goal is picked or a baseline recorded.
+- **Baseline** is 30 s. It shows the full Rainbow Passage (346 words), which scrolls while the timer and buttons stay in view.
+- **Range table:** goal rows get a teal tint plus an edge stripe. The row following your voice gets a stronger fill and an outline, with stronger tints in dark mode.
+- **Live grid:** VoiceOver users swipe up or down to move the resonance goal, as an alternative to dragging.
+- **Regional English:** copy follows US, Canadian or British/Australian/NZ spelling, with each country's name for the voice professional (`docs/LOCALIZATION.md`).
+
 ## 1. Onboarding / goal setup
 ```
 ┌─────────────────────────┐

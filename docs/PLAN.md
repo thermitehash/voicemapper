@@ -38,6 +38,12 @@ Guiding principle: whatever helps the user accomplish their voice goal safely.
 - Privacy: optional on-device recordings, delete-all, optional Face ID lock.
 - Disclaimer: not a substitute for a speech-language pathologist; link to finding gender-affirming voice therapy.
 
+## 7. Launch and data rules (Nov 2026)
+- **Markets:** US, Canada, UK, Australia and New Zealand, in English only. Regional spelling, professional names and therapist directories are in `docs/LOCALIZATION.md`.
+- **Data rule:** measurement and corrections stay true to the data and neutral between goals. Anything directional points only towards the user's own goal.
+- **Audience priority:** trans women first, because voice training is their main route and they have the most research. Every goal stays fully supported.
+- **Accuracy:** S18 found and fixed higher voices reading too dark. The real-voice results are in `docs/ACCURACY.md`.
+
 ## Risks
 - Formants noisy at high F0 → vowel-guided exercises, median smoothing, confidence gates.
 - Norms vary by person and language → present as typical ranges, not rules.
