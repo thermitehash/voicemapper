@@ -2,7 +2,7 @@
 
 **Decision (Nov 2026):** the app launches in the **US, Canada, UK, Australia and New Zealand**, in English only. **Iceland** was added later, also English only: it uses the English listing, British spelling and the Icelandic association's member list.
 - **Accent caveat for Iceland:** the norms are from American English, as with accent effect B. Icelandic users speaking Icelandic produce a different mix of vowels. Icelandic /r/ is trilled or tapped, so it doesn't trigger the rhotic gate.
-- **App Store check:** if App Store Connect asks for trader status for EEA storefronts, check what it would publish first (see the public-identity note). French, Spanish and te reo Māori are out of scope for now. Each would need a full translation, a reading passage in that language, and voice norms for that language.
+- **Trader status doesn't apply to Iceland.** Apple applies the EU Digital Services Act trader requirement to EU storefronts, and Iceland isn't in the EU. Its EEA membership could matter later if the law is extended to the EEA; that wasn't confirmed as of Nov 2026. App Store Connect asks every developer for an account-level trader or non-trader declaration. A non-trader declaration publishes nothing. French, Spanish and te reo Māori are out of scope for now. Each would need a full translation, a reading passage in that language, and voice norms for that language.
 
 ## 1. What changed in the app (done, build 47)
 
