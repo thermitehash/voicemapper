@@ -39,6 +39,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,8 +72,11 @@ fun RangeScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-            Text(pitch?.let { "${it.note.name}   ${swiftRound(it.frequency)} Hz" } ?: if (listening) "Say or hum a note" else "Tap Speak to start",
+        val readout = pitch?.let { "${it.note.name}   ${swiftRound(it.frequency)} Hz" } ?: if (listening) "Say or hum a note" else "Tap Speak to start"
+        // State, so TalkBack re-reads it while focused (iOS .updatesFrequently).
+        Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant).padding(vertical = 8.dp)
+            .clearAndSetSemantics { contentDescription = "Current note"; stateDescription = readout }, contentAlignment = Alignment.Center) {
+            Text(readout,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = if (pitch == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
         }
