@@ -390,7 +390,9 @@ class MappingTest {
         c.expect(r.apply(slp, RegionalSpelling.Variant.BRITISH) == "Not a substitute for a speech and language therapist.", "UK term")
         c.expect(r.apply(slp, RegionalSpelling.Variant.AUSTRALIAN) == "Not a substitute for a speech pathologist.", "AU term")
         c.expect(r.apply(slp, RegionalSpelling.Variant.NEW_ZEALAND) == "Not a substitute for a speech-language therapist.", "NZ term")
-        for (region in listOf("US", "CA", "GB", "AU", "NZ", null))
+        c.expect(r.directory("IS").url.startsWith("https://www.talmein.is/"), "Iceland directory")
+        c.expect(r.variant(listOf("is-IS"), "IS") == RegionalSpelling.Variant.BRITISH, "Icelandic device → British spelling")
+        for (region in listOf("US", "CA", "GB", "AU", "NZ", "IS", null))
             c.expect(r.directory(region).url.startsWith("https://"), "directory link for ${region ?: "unknown"}")
 
         val british = Regex("\\b([Pp]ractis|[Cc]olour|[Cc]entre|[Rr]ecognis|[Gg]rey\\b|[Mm]um\\b|speech-language patholog)")

@@ -1,6 +1,8 @@
 # Localisation and accents (S17)
 
-**Decision (Nov 2026):** the app launches in the **US, Canada, UK, Australia and New Zealand**, in English only. French, Spanish and te reo Māori are out of scope for now. Each would need a full translation, a reading passage in that language, and voice norms for that language.
+**Decision (Nov 2026):** the app launches in the **US, Canada, UK, Australia and New Zealand**, in English only. **Iceland** was added later, also English only: it uses the English listing, British spelling and the Icelandic association's member list.
+- **Accent caveat for Iceland:** the norms are from American English, as with accent effect B. Icelandic users speaking Icelandic produce a different mix of vowels. Icelandic /r/ is trilled or tapped, so it doesn't trigger the rhotic gate.
+- **Trader status doesn't apply to Iceland.** Apple applies the EU Digital Services Act trader requirement to EU storefronts, and Iceland isn't in the EU. Its EEA membership could matter later if the law is extended to the EEA; that wasn't confirmed as of Nov 2026. App Store Connect asks every developer for an account-level trader or non-trader declaration. A non-trader declaration publishes nothing. French, Spanish and te reo Māori are out of scope for now. Each would need a full translation, a reading passage in that language, and voice norms for that language.
 
 ## 1. What changed in the app (done, build 47)
 
@@ -13,6 +15,7 @@ The copy is written once, in British spelling (the existing text). At display ti
 | British | GB, and the fallback for anywhere else | source text | speech and language therapist | ASLTIP |
 | Australian | AU | source text | speech pathologist | Speech Pathology Australia |
 | New Zealand | NZ | source text | speech-language therapist | NZ Speech-language Therapists' Association |
+| Iceland (added Nov 2026) | IS, or any language with region IS | source text (British) | speech and language therapist | Félag talmeinafræðinga á Íslandi member list (talmein.is/felagatal, in Icelandic) |
 
 - The spelling variant follows the first preferred language (en-US, en-GB…), then falls back to the device region. The directory link follows the device region, because it depends on where the user lives, not on which spelling they read.
 - **How it's wired:** UI copy that contains a regional word goes through `Text(regional:)` (`UI/RegionalText.swift`). That covers exercise steps, evidence notes, the strength label, the Rainbow Passage, stage requirements, safety messages, and the literals that contain a regional word.

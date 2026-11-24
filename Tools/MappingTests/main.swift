@@ -479,6 +479,9 @@ func steps(of e: Exercise) -> [String] {
         expect(R.directory(region: region).url.scheme == "https", "directory link for \(region ?? "unknown")")
     }
     expect(R.directory(region: "AU").url.host?.contains("speechpathologyaustralia") == true, "AU directory")
+    expect(R.directory(region: "IS").url.host == "www.talmein.is", "Iceland directory")
+    expect(R.variant(preferredLanguages: ["en-IS"], region: "IS") == .british, "en-IS → British spelling")
+    expect(R.variant(preferredLanguages: ["is-IS"], region: "IS") == .british, "Icelandic device → British spelling")
 
     let src = "Practise the colour drill; you've practised. Recognised by my mum. Grey, centre, Control Centre."
     for v in [R.Variant.british, .australian, .newZealand] { expect(R.apply(src, variant: v) == src, "\(v) spelling unchanged") }

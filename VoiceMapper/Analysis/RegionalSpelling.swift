@@ -1,7 +1,7 @@
 import Foundation
 
-/// Regional English for the five launch markets (US, Canada, UK, Australia,
-/// New Zealand). The app's copy is written once in British/Commonwealth
+/// Regional English for the launch markets (US, Canada, UK, Australia,
+/// New Zealand, and Iceland, which gets British spelling). The app's copy is written once in British/Commonwealth
 /// spelling, which UK, Australian and NZ users see as is. US and Canadian users
 /// get a word-for-word respelling at display time. Every market also gets its
 /// own name for the voice professional and its own directory link.
@@ -60,6 +60,8 @@ enum RegionalSpelling {
         case "GB", "IM", "JE", "GG": ("ASLTIP (independent speech and language therapists)", URL(string: "https://asltip.com/find-a-speech-therapist/")!)
         case "AU": ("Speech Pathology Australia", URL(string: "https://speechpathologyaustralia.org.au/find-a-speech-pathologist")!)
         case "NZ": ("New Zealand Speech-language Therapists' Association", URL(string: "https://speechtherapy.org.nz/find-a-therapist/")!)
+        // Iceland (English-only listing): the association's public member list, in Icelandic.
+        case "IS": ("Félag talmeinafræðinga á Íslandi (member list, in Icelandic)", URL(string: "https://www.talmein.is/felagatal/")!)
         default: ("ASHA ProFind", URL(string: "https://find.asha.org/pro/")!)
         }
     }
