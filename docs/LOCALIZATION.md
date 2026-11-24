@@ -135,8 +135,9 @@ The norms behind the scale and zones come from Hillenbrand et al. (1995; cis adu
 Sources for this section: [Leung et al. 2018 (ERIC)](https://eric.ed.gov/?id=EJ1171925), [transmasculine F0 meta-analysis and resynthesis study (PMC9584127)](https://pmc.ncbi.nlm.nih.gov/articles/PMC9584127/), [Trans male voice in the first year of testosterone (PubMed 28892815)](https://pubmed.ncbi.nlm.nih.gov/28892815/), [Bright voice quality and F0 variation in non-binary speakers (J Voice 2022)](https://www.sciencedirect.com/science/article/abs/pii/S089219972200234X), [Gender-expansive listeners (ResearchGate)](https://www.researchgate.net/publication/356503371_Gender_expansive_listeners_utilize_a_non-binary_multidimensional_conception_of_gender_to_inform_voice_gender_perception), [Voice gender diversity review 2025 (PMC12539971)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12539971/). These were read at abstract level; check full papers before quoting numbers in the app.
 
 ## 4. Next steps
-- **S18 (done):** rhotic gate, high-pitch LPC fix, real-voice tests, Android port.
-- **Still open:** accent offsets (B, blocked on data); the scale's typical positions on connected speech (`docs/ACCURACY.md`); exercise wording tweaks C (low priority, needs the Android strings changed too).
+- **S18 (done, build 48):** rhotic gate, high-pitch LPC fix, real-voice tests, Android port.
+- **S19 (done, build 49 / Android 0.3):** citations above verified; exercise wording tweaks C done (a deep "oo" further back, hold "ee" steady); evidence notes name who each study covered; Android regional spelling.
+- **Still open:** accent offsets (B, blocked on data: non-American recordings or the PDFs would unblock it); the scale's typical positions on connected speech (`docs/ACCURACY.md`).
 
 ## Original proposal (S17)
 **S18 Accent calibration (Opus, DSP):** do A first (the F3 gate, with DSPCheck tests), then measure B. Add the Accent setting only if B's offsets exceed 3 points. Port to `android/core` and run `./gradlew :core:test`.
