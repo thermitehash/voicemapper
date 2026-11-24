@@ -123,6 +123,8 @@ The norms behind the scale and zones come from Hillenbrand et al. (1995; cis adu
   - Gender-expansive listeners judge voices on more than one dimension (Hope & Lilley). A 2025 review notes wide variability in transmasculine and nonbinary acoustic profiles.
   - **Impact:** the male/ambiguous/female zones are a description of cis listener norms, not targets. Custom zones and the androgynous preset already exist. Keep goal zones free to sit anywhere on the grid, including combinations the norms call uncommon.
 
+**Priority (user decision, Nov 2026):** trans women are the main audience. They have the most research, and they get no help from hormones on voice, while testosterone lowers pitch for many trans men. So effort goes first to the feminising side: accuracy at higher pitches, the feminising-goal exercise paths, and device testing with feminising goals. This sets where effort goes. It doesn't change what the app measures, and other goals keep full support.
+
 **Rules this repo follows (user decision, Nov 2026):**
 - Measurement, corrections and localisation must be true to the data and neutral between goals.
 - A correction may only move readings because the measurement was wrong, as with the harmonic lock-in, rhotic frames and pitch independence. Never because of who the user is or which goal they picked.

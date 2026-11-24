@@ -3,6 +3,7 @@
 iOS voice-training app (SwiftUI, iOS 17+, Swift 6). Fully local: no network code, analytics, or third-party SDKs.
 Guiding principle: help the user reach *their* voice goal safely — no "correct" voice, strain prevention built in.
 Data rule (Nov 2026): measurement, corrections and localisation stay true to the data and neutral between goals. A correction may move readings only because the measurement was wrong, never because of who the user is. Anything directional (hold steps, hints, plan wording) points only towards the user's own goal. Note which group (trans fem, trans masc, nonbinary, cis) the evidence comes from; see `docs/LOCALIZATION.md` §3.
+Priority (Nov 2026): trans women are the main audience. Testosterone does much of the work for many trans men, and trans women have the most research. So feminising accuracy, exercises and device testing come first. Masculine, androgynous and custom goals stay fully supported, and readings are never skewed towards any goal.
 
 Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`. DSP accuracy results: `docs/ACCURACY.md`. Launch markets, regional English and accent effects (S17): `docs/LOCALIZATION.md`. After any DSP or mapping change, run `Tools/DSPCheck/run.sh --test` and `Tools/MappingTests/run.sh`; both must exit 0.
 
