@@ -50,14 +50,19 @@ So a vowel that moves F2 or F3 by several hundred Hz moves that frame by 10–50
 
 **Relative progress is not affected.** The baseline, hold targets, history trends and strain alerts all compare the user with themselves. What accents can bias is **absolute placement**: where the dot falls against the shaded male/ambiguous/female zones, the session colour stripe, and preset goal zones.
 
-### A. Rhotic /r/ reads darker (US, Canada, Scotland, parts of SW England). Priority: high
+### A. Rhotic /r/ reads darker (US, Canada, Scotland, parts of SW England). **Done in S18**
 - **What happens:** r-coloured vowels ("her", "car", "for", "water") pull F3 down to roughly 1600–2000 Hz, against about 2500–3000 Hz in plain vowels. A 700 Hz drop moves those frames about 21 points darker, or about 50 points if LPC also misses F4.
 - **Who it affects:** rhotic speakers spend much of connected speech in r-coloured stretches. The Rainbow Passage is full of them: rainbow, raindrops, air, prism, form, colours, there, horizon, according, for. So in free speech and the reading exercise, an American or Scottish speaker reads darker than an English, Australian or NZ speaker with the same vocal tract.
 - **Proposed fix:** in `ResonanceTracker`, drop frames whose F3 is more than ~20% below the running median F3 of recent accepted frames. That excludes r-colouring for every accent, which keeps the accents comparable.
   - Don't use an F3−F2 gap test: women's "ee" has F2 and F3 only ~500 Hz apart and would be dropped.
 - **Test:** add synthetic /ɝ/ (F3 lowered) and an "r-coloured reading" sequence to `DSPCheck`. Check that the score of a rhotic and a non-rhotic sequence differs by ≤ 3 points, and that the existing 1273 checks don't regress.
+- **S18 result:** done as proposed, with a 0.8 × running-median-F3 gate.
+  - On Hillenbrand's real recordings, real /ɝ/ reads about 40 points darker than the other vowels. The gate catches all 80 /ɝ/ tokens and none of 1012 plain ones.
+  - With r-coloured vowels mixed in, speech now reads within 1 point of the same speech without them, on synthetic and real voices.
+  - Results are in `docs/ACCURACY.md`. Skipped frames aren't counted as misses, so an "r" doesn't blank the dot.
+- **Found along the way:** the app read higher-pitched voices up to 49 points too dark. LPC was locking onto harmonics, which wasn't an accent effect. It's fixed with a pitch-blended LPC order; see `docs/ACCURACY.md` S18. That bias hit everyone with a higher voice, whatever their goal, and it was much larger than any accent effect here.
 
-### B. Fronted vowels read brighter (Australia, NZ, southern England, younger North Americans). Priority: medium
+### B. Fronted vowels read brighter (Australia, NZ, southern England, younger North Americans). **Blocked on data (S18)**
 - **What happens:** GOOSE ("oo") is fronted to [ʉː] in all these accents: F2 is roughly 1600–2200 Hz, against ~1000 Hz for American /u/ in Hillenbrand. GOAT is fronted too.
   - Australian and NZ START ("ah") is central [ɐː], with higher F2 than American /ɑ/.
   - NZ raises TRAP and DRESS ("yes" sounds close to "yis"), which raises F2. NZ KIT is centralised, which lowers it.
@@ -67,6 +72,18 @@ So a vowel that moves F2 or F3 by several hundred Hz moves that frame by 10–50
   2. If an accent's average differs from Hillenbrand by more than 3 points, add a per-accent offset to the typical zone positions and preset goal zones. Never apply it to the user's own score.
   3. Add an **Accent** setting (US, Canada, UK and Ireland, Australia, New Zealand, Other or not sure), defaulting from the device region. Region isn't accent, so the user can change it. "Other or not sure" uses no offset.
   4. Many of these tables don't report F4, so synthesise a standard F4 and note that limit.
+
+- **S18 status:** no offset and no Accent setting added, because the published numbers couldn't be obtained in usable form:
+  - Watson, Harrington & Evans 1998 (NZ vs Australian) gives monophthongs only as F1/F2 plots.
+  - Deterding 1997's table was unreadable from the sources reachable here.
+  - Cox 2006 is paywalled.
+  - The South Australian table (SST 2006) extracted garbled, and covers women only.
+- Being true to the data means not guessing an offset.
+- **To unblock, either:**
+  1. drop the PDFs of Deterding 1997, Cox 2006 and a Canadian table into `Tools/DSPCheck/reference/`; or
+  2. better, record a few non-American speakers (reference README) and tag their accents.
+- Most of these studies report only F1/F2, so the offset would be modelled with American F3/F4.
+- The rhotic gate already removes the largest accent difference.
 
 ### C. "oo" prompts and the forward/back drill. Priority: low
 - **What happens:** the "oo" step asks for a darker sound. A speaker with fronted GOOSE who just says "oo" will barely move the score. The step already says "tongue pulled back and lips rounded", which describes the articulation, not the letter, so it works for every accent.
@@ -89,7 +106,39 @@ So a vowel that moves F2 or F3 by several hundred Hz moves that frame by 10–50
 ### G. Real-voice check across accents
 When the real-voice reference set is recorded (S16 open item), try to include at least one non-rhotic speaker and one Australian or NZ speaker, and tag each file's accent in `reference.json`. That's the only way to confirm A and B on real voices.
 
-## 3. Proposed next session
+## 3. Who the data describes: trans fem, trans masc and nonbinary voices
+The norms behind the scale and zones come from Hillenbrand et al. (1995; cis adult men and women from Michigan) and Gelfer & Mikos (2005). Neither describes trans or nonbinary speakers. What the research says for each group, and what it means for the app:
+
+- **Trans fem.**
+  - This group has the most evidence. Leung, Oates & Chan (2018, JSLHR 61(2):266–297; meta-analysis) found speaking F0 accounted for 41.6% of the variance in perceived gender. Resonance, loudness, articulation and intonation were also associated with it, and findings on breathiness were mixed.
+  - Formant biofeedback studies (Carew et al. 2007; Kawitzky & McAllister 2020; both in the exercise evidence) were done with trans women.
+  - **Impact:** the S18 high-pitch fix matters most here. Before it, a voice raised into the 180–230 Hz range read up to 49 points darker than it was, which would have told a person their resonance was moving the wrong way.
+- **Trans masc.**
+  - A meta-analysis of 19 studies found testosterone lowers F0, but voice–gender congruence isn't always reached.
+  - Formant changes are small: one study found transmasculine speakers' formants only about 1.05× lower than cis women's.
+  - Results vary a lot between people ("make no assumptions": a first-year testosterone study, PubMed 28892815). So resonance can lag behind pitch.
+  - **Impact:** as F0 drops through 175 → 150 Hz the analyser blends LPC orders. The new pitch-independence test shows a fixed mouth shape scores within ±3 across that band, so a falling pitch doesn't fake a darker resonance. The resonance evidence notes cite trans fem studies; trans masc resonance-training evidence is thinner. Say so in the notes rather than implying the same strength of evidence.
+- **Nonbinary.**
+  - Data is thin. One study of AFAB nonbinary speakers found most combined an intermediate F0 with a brighter voice quality (less negative spectral slope, higher CPP), a cue mix not seen in the cis groups.
+  - Gender-expansive listeners judge voices on more than one dimension (Hope & Lilley). A 2025 review notes wide variability in transmasculine and nonbinary acoustic profiles.
+  - **Impact:** the male/ambiguous/female zones are a description of cis listener norms, not targets. Custom zones and the androgynous preset already exist. Keep goal zones free to sit anywhere on the grid, including combinations the norms call uncommon.
+
+**Priority (user decision, Nov 2026):** trans women are the main audience. They have the most research, and they get no help from hormones on voice, while testosterone lowers pitch for many trans men. So effort goes first to the feminising side: accuracy at higher pitches, the feminising-goal exercise paths, and device testing with feminising goals. This sets where effort goes. It doesn't change what the app measures, and other goals keep full support.
+
+**Rules this repo follows (user decision, Nov 2026):**
+- Measurement, corrections and localisation must be true to the data and neutral between goals.
+- A correction may only move readings because the measurement was wrong, as with the harmonic lock-in, rhotic frames and pitch independence. Never because of who the user is or which goal they picked.
+- Anything that pushes in one direction (stepped hold targets, "brighter" or "darker" hints, plan wording) may only push in the direction of the user's own goal.
+- Exercises stay two-way (forward ↔ back, lighter ↔ heavier, slides both ways around the user's goal), and `MappingTests` already fails on goal-specific step wording.
+- When evidence for a technique comes from only one group, the evidence note says which.
+
+Sources for this section: [Leung et al. 2018 (ERIC)](https://eric.ed.gov/?id=EJ1171925), [transmasculine F0 meta-analysis and resynthesis study (PMC9584127)](https://pmc.ncbi.nlm.nih.gov/articles/PMC9584127/), [Trans male voice in the first year of testosterone (PubMed 28892815)](https://pubmed.ncbi.nlm.nih.gov/28892815/), [Bright voice quality and F0 variation in non-binary speakers (J Voice 2022)](https://www.sciencedirect.com/science/article/abs/pii/S089219972200234X), [Gender-expansive listeners (ResearchGate)](https://www.researchgate.net/publication/356503371_Gender_expansive_listeners_utilize_a_non-binary_multidimensional_conception_of_gender_to_inform_voice_gender_perception), [Voice gender diversity review 2025 (PMC12539971)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12539971/). These were read at abstract level; check full papers before quoting numbers in the app.
+
+## 4. Next steps
+- **S18 (done):** rhotic gate, high-pitch LPC fix, real-voice tests, Android port.
+- **Still open:** accent offsets (B, blocked on data); the scale's typical positions on connected speech (`docs/ACCURACY.md`); exercise wording tweaks C (low priority, needs the Android strings changed too).
+
+## Original proposal (S17)
 **S18 Accent calibration (Opus, DSP):** do A first (the F3 gate, with DSPCheck tests), then measure B. Add the Accent setting only if B's offsets exceed 3 points. Port to `android/core` and run `./gradlew :core:test`.
 
 ## Sources

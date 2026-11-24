@@ -29,12 +29,26 @@ struct FormantAnalyzer {
     private var decimated: [Float]
     private var emphasized: [Float]
 
-    init(sampleRate: Double) {
+    /// How many LPC poles to fit.
+    enum Poles: Sendable {
+        /// Two per kHz plus four (16 at 12 kHz): right for lower voices.
+        case standard
+        /// Two fewer (14 at 12 kHz), for voices above ~160 Hz. Their harmonics
+        /// are sparse enough that the spare poles lock onto a harmonic (e.g.
+        /// 3–4 × F0) and push every formant up a slot. On Hillenbrand et al.'s
+        /// (1995) recordings the standard order read women's "hod" 49 points
+        /// and "had" 35 points too dark; 14 poles cut the error at every pitch
+        /// above 150 Hz to a bias of +3–5 (S18, docs/ACCURACY.md).
+        case highPitch
+    }
+
+    init(sampleRate: Double, poles: Poles = .standard) {
         factor = max(1, Int((sampleRate / Self.targetRate).rounded()))
         analysisRate = sampleRate / Double(factor)
         // Rule of thumb: two poles per kHz of bandwidth plus two for the
         // glottal source and lip radiation.
-        order = 4 + Int(analysisRate / 1000)
+        let standardOrder = 4 + Int(analysisRate / 1000)
+        order = poles == .standard ? standardOrder : standardOrder - 2
         let analysisCount = Int(analysisRate * 0.040)  // 40 ms window
 
         // Windowed-sinc anti-alias filter, cutoff 90% of the new Nyquist.

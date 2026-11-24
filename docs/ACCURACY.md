@@ -70,6 +70,42 @@ A deliberate mutation (moving the 145 Hz boundary to 146) was caught, so the sui
 - **Bonus:** the same fix cleared the S13 limit at /ɑ/ 455–475 Hz.
 - **Regressions:** none on the S13 tables.
 
+## Real voices and accents (S18)
+Hillenbrand et al.'s (1995) original recordings are public (45 men, 48 women, 12 /hVd/ vowels, with hand-checked formants; [github.com/santiagobarreda/hillenbrand_et_al_1995](https://github.com/santiagobarreda/hillenbrand_et_al_1995)). With them unpacked, `DSPCHECK_H95=<folder> Tools/DSPCheck/run.sh --test` adds real-voice checks. Copy `vowdata.dat` into the folder too; the recordings themselves are not committed.
+
+**Found: the app read higher voices too dark.**
+- At 16 LPC poles, a voice's sparse harmonics at ~200 Hz and up let a spare pole lock onto a harmonic (3–4 × F0). That pushed every formant up a slot.
+- Mean score error, app vs measured formants, women: "hod" −49, "had" −35, "head" −34, "hud" −19, "hid" −14. Men were within about ±9.
+- The synthetic tests missed it because only four vowels were tested, and the synthetic harmonics were too clean.
+- This biased every higher-pitched voice towards the dark end, whatever the speaker's goal.
+
+**Fix.**
+- `FormantAnalyzer.Poles.highPitch` (14 poles) is used above 175 Hz and the standard 16 below 150 Hz, blended linearly in between, so nothing jumps around 160 Hz.
+- The choice follows the measured pitch, not any setting about the person.
+
+| Error by F0 band (Hillenbrand tokens) | 16 poles | 14 poles |
+|---|---|---|
+| < 150 Hz (men) | bias −0.5 / +0.4, MAE 6–7 | +3 / +5, MAE 8 |
+| 150–170 Hz | −2.0, MAE 7.3 | +3.2, MAE 6.0 |
+| 170–190 Hz | −11.3, MAE 15.6 | +5.1, MAE 7.2 |
+| 190–230 Hz (women) | −16 to −20, MAE 19–23 | +3, MAE 6–7 |
+| > 230 Hz | −14.6, MAE 17.9 | +4.2, MAE 7.0 |
+
+**After the fix**, the mean error per sex × vowel is within ±6.4 for every vowel except four:
+- men's "heed" −8.5;
+- women's "hawed" +9.1, "hud" +10.2 and "hood" +11.6 (back vowels, the known weak-F4 class).
+
+The average size of error is 3.8 points. Women's mean error is 3.0 points brighter than men's, against 16.5 points darker before the fix.
+
+**New checks:**
+- **Real resonance:** each sex × vowel mean error ≤ 12, average ≤ 5, women–men gap ≤ 5. Forcing the old 16-pole order fails 10 checks.
+- **Pitch independence:** the same formants at any pitch from 110 to 240 Hz must score within 6 points, so moving pitch towards a goal, in either direction, doesn't fake a resonance change. Currently ≤ 5.
+- **Rhotic gate** (`ResonanceTracker`): frames with F3 below 0.8 × the running median F3 are skipped. On Hillenbrand's data that threshold catches all 80 /ɝ/ tokens and 0 of 1012 plain-vowel tokens.
+  - Synthetic speech with r-coloured vowels a third of the time now reads within 0.8 points of the same speech without them, against 13–22 points darker ungated.
+  - On real voices (each talker's 11 vowels, with "heard" added after every third), the mean shift is −0.4 for men and −0.9 for women, against −4.4 and −6.0 ungated.
+
+**Open: the scale's typical positions.** On real recordings, the app's mean score over 11 plain vowels is about 31 for men and 73–76 for women. `PerceivedGender.typicalResonance` says 25 and 72 (from four vowels). Running speech is dominated by reduced vowels, which sit nearer the neutral tube (≈ 25 for men). So which is right depends on the vowel mix of real speech. Don't change it until real connected-speech recordings are measured.
+
 ## Comparing real recordings with Praat
 1. Record a few 2–3 second sustained vowels ("ee", "ah", "oo") and a sentence as WAV files, for example with Voice Memos exported as WAV, or QuickTime.
 2. In Praat, open each file and choose View & Edit:
@@ -81,4 +117,5 @@ A deliberate mutation (moving the 145 Hz boundary to 146) was caught, so the sui
 ## Sources
 - de Cheveigné, A., & Kawahara, H. (2002). YIN, a fundamental frequency estimator for speech and music. *JASA*, 111(4), 1917–1930.
 - Hillenbrand, J., Getty, L. A., Clark, M. J., & Wheeler, K. (1995). Acoustic characteristics of American English vowels. *JASA*, 97(5), 3099–3111.
+- Hillenbrand et al. (1995) recordings and vowdata.dat, hosted with permission at github.com/santiagobarreda/hillenbrand_et_al_1995.
 - Klatt, D. H. (1980). Software for a cascade/parallel formant synthesizer. *JASA*, 67(3), 971–995.

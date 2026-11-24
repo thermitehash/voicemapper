@@ -2,6 +2,7 @@ package com.thrivestorm2.voicemapper.core
 
 import com.thrivestorm2.voicemapper.core.analysis.ResonanceScorer
 import com.thrivestorm2.voicemapper.core.dsp.FormantAnalyzer
+import com.thrivestorm2.voicemapper.core.dsp.ResonanceTracker
 import com.thrivestorm2.voicemapper.core.dsp.PitchDetector
 import java.io.File
 import java.nio.ByteBuffer
@@ -114,20 +115,31 @@ fun pitchStats(x: FloatArray, truth: Double?, rate: Double = RATE): PitchStats {
 
 data class FormantStats(val formants: List<Double?>, val spacing: Double?, val accepted: Double)
 
-fun formantStats(x: FloatArray, rate: Double = RATE): FormantStats {
-    val analyzer = FormantAnalyzer(rate)
+/** Like iOS DSPCheck: the LPC order (or blend) the tracker uses at pitch [f0]; null = standard. */
+fun formantStats(x: FloatArray, rate: Double = RATE, f0: Double? = null): FormantStats {
+    val w = f0?.let { ResonanceTracker.highPitchShare(it) } ?: 0.0
+    val standard = FormantAnalyzer(rate)
+    val high = FormantAnalyzer(rate, FormantAnalyzer.Poles.HIGH_PITCH)
     val hop = 2048
     val perSlot = List(4) { mutableListOf<Double>() }
     val spacings = mutableListOf<Double>()
     var frames = 0
     var start = 0
-    while (start + analyzer.frameLength <= x.size) {
+    while (start + standard.frameLength <= x.size) {
         frames++
-        val f = analyzer.analyze(x, start, analyzer.frameLength)
-        val s = f?.let { ResonanceScorer.spacing(it) }
-        if (f != null && s != null) {
-            spacings += s
-            ResonanceScorer.assigned(f).forEachIndexed { i, v -> if (i < 4) perSlot[i] += v }
+        val lf = if (w < 1) standard.analyze(x, start, standard.frameLength) else null
+        val hf = if (w > 0) high.analyze(x, start, standard.frameLength) else null
+        val ls = lf?.let { ResonanceScorer.spacing(it) }
+        val hs = hf?.let { ResonanceScorer.spacing(it) }
+        val frame: Pair<Double, List<FormantAnalyzer.Formant>>? = when {
+            ls != null && hs != null -> Pair(ls + w * (hs - ls), if (w < 0.5) lf!! else hf!!)
+            ls != null -> Pair(ls, lf!!)
+            hs != null -> Pair(hs, hf!!)
+            else -> null
+        }
+        if (frame != null) {
+            spacings += frame.first
+            ResonanceScorer.assigned(frame.second).forEachIndexed { i, v -> if (i < 4) perSlot[i] += v }
         }
         start += hop
     }
