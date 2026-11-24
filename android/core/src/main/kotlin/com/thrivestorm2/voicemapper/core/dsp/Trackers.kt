@@ -82,10 +82,28 @@ class ResonanceTracker(sampleRate: Double, private val onReading: (ResonanceRead
         private const val DROPOUT_FRAMES = 8
         /** Above this F0 LPC can't find formants reliably (S13 check). */
         const val MAX_PITCH = 350.0
+        /**
+         * Frames whose F3 is below this share of the running median F3 are
+         * r-coloured ("her", "car") and skipped, so rhotic accents don't read
+         * darker than non-rhotic ones (S18; see the iOS tracker).
+         */
+        private const val RHOTIC_F3_RATIO = 0.8
+        private const val F3_WINDOW_COUNT = 60
+        private const val F3_MINIMUM_FRAMES = 10
+        /** Standard and high-pitch LPC orders are blended across this pitch band. */
+        private const val BLEND_LOW = 150.0
+        private const val BLEND_HIGH = 175.0
+
+        /** 0 → standard order only, 1 → high-pitch order only. */
+        fun highPitchShare(pitch: Double): Double = ((pitch - BLEND_LOW) / (BLEND_HIGH - BLEND_LOW)).coerceIn(0.0, 1.0)
     }
 
-    private val analyzer = FormantAnalyzer(sampleRate)
+    private class Frame(val spacing: Double, val formants: List<FormantAnalyzer.Formant>)
+
+    private val standard = FormantAnalyzer(sampleRate)
+    private val highPitch = FormantAnalyzer(sampleRate, FormantAnalyzer.Poles.HIGH_PITCH)
     private val samples = SampleBuffer()
+    private val recentF3 = ArrayDeque<Double>()
     private val recent = ArrayDeque<Double>()
     private var missedRun = 0
     private var hasReading = false
@@ -94,18 +112,36 @@ class ResonanceTracker(sampleRate: Double, private val onReading: (ResonanceRead
     /** [pitch] is the current smoothed F0, null when unvoiced. */
     fun process(incoming: FloatArray, length: Int = incoming.size, pitch: Double?) {
         samples.append(incoming, 0, length)
-        val needed = maxOf(analyzer.frameLength, HOP)
+        val needed = maxOf(standard.frameLength, HOP)
         while (samples.count >= needed) {
-            val formants = if (pitch != null && pitch <= MAX_PITCH)
-                analyzer.analyze(samples.data, samples.start, samples.count) else null
+            val frame = if (pitch != null && pitch <= MAX_PITCH) analyze(pitch) else null
             samples.removeFirst(HOP)
-            update(formants)
+            update(frame)
         }
     }
 
-    private fun update(formants: List<FormantAnalyzer.Formant>?) {
-        val spacing = formants?.let { ResonanceScorer.spacing(it) }
-        if (formants == null || spacing == null) {
+    /** Spacing from the LPC order that suits this pitch, blended across the band. */
+    private fun analyze(pitch: Double): Frame? {
+        val w = highPitchShare(pitch)
+        var low: Frame? = null
+        var high: Frame? = null
+        if (w < 1) standard.analyze(samples.data, samples.start, samples.count)?.let { f ->
+            ResonanceScorer.spacing(f)?.let { low = Frame(it, f) }
+        }
+        if (w > 0) highPitch.analyze(samples.data, samples.start, samples.count)?.let { f ->
+            ResonanceScorer.spacing(f)?.let { high = Frame(it, f) }
+        }
+        val l = low
+        val h = high
+        return when {
+            l != null && h != null -> Frame(l.spacing + w * (h.spacing - l.spacing), if (w < 0.5) l.formants else h.formants)
+            l != null -> l
+            else -> h
+        }
+    }
+
+    private fun update(frame: Frame?) {
+        if (frame == null) {
             missedRun++
             if (missedRun >= DROPOUT_FRAMES) {
                 recent.clear()
@@ -114,15 +150,28 @@ class ResonanceTracker(sampleRate: Double, private val onReading: (ResonanceRead
             }
             return
         }
+        // Not a miss: an "r" stretch shouldn't blank the reading.
+        if (isRhotic(frame.formants)) return
         missedRun = 0
-        recent.addLast(spacing)
+        recent.addLast(frame.spacing)
         if (recent.size > MEDIAN_COUNT) recent.removeFirst()
         if (recent.size < MINIMUM_FRAMES) return
         val median = recent.sorted()[recent.size / 2]
         val value = smoothed?.let { it + FOLLOW_RATE * (median - it) } ?: median
         smoothed = value
         hasReading = true
-        onReading(ResonanceReading(ResonanceScorer.score(value), value, formants.take(4).map { it.frequency }))
+        onReading(ResonanceReading(ResonanceScorer.score(value), value, frame.formants.take(4).map { it.frequency }))
+    }
+
+    /** Records this frame's F3 and reports whether it is r-coloured. */
+    private fun isRhotic(formants: List<FormantAnalyzer.Formant>): Boolean {
+        val assigned = ResonanceScorer.assigned(formants)
+        if (assigned.size < 3) return false
+        val f3 = assigned[2]
+        val reference = if (recentF3.size >= F3_MINIMUM_FRAMES) recentF3.sorted()[recentF3.size / 2] else null
+        recentF3.addLast(f3)
+        if (recentF3.size > F3_WINDOW_COUNT) recentF3.removeFirst()
+        return reference != null && f3 < RHOTIC_F3_RATIO * reference
     }
 }
 

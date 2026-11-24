@@ -16,8 +16,16 @@ import kotlin.math.sqrt
  * in step. Downsamples to ~11 kHz, pre-emphasis + Hamming window,
  * autocorrelation + Levinson–Durbin, polynomial roots → formants.
  */
-class FormantAnalyzer(sampleRate: Double) {
+class FormantAnalyzer(sampleRate: Double, poles: Poles = Poles.STANDARD) {
     data class Formant(val frequency: Double, val bandwidth: Double)
+
+    /**
+     * How many LPC poles to fit. STANDARD is two per kHz plus four (16 at
+     * 12 kHz); HIGH_PITCH is two fewer, for voices above ~160 Hz, whose sparse
+     * harmonics otherwise catch a spare pole and push every formant up a slot
+     * (S18; see iOS `FormantAnalyzer.Poles`).
+     */
+    enum class Poles { STANDARD, HIGH_PITCH }
 
     companion object {
         private const val TARGET_RATE = 11_025.0
@@ -82,7 +90,8 @@ class FormantAnalyzer(sampleRate: Double) {
     /** Rate after downsampling. */
     val analysisRate = sampleRate / factor
     // Two poles per kHz plus two for the glottal source and lip radiation.
-    private val order = 4 + (analysisRate / 1000).toInt()
+    private val standardOrder = 4 + (analysisRate / 1000).toInt()
+    private val order = if (poles == Poles.STANDARD) standardOrder else standardOrder - 2
     private val analysisCount = (analysisRate * 0.040).toInt()
     private val lowPass: FloatArray = if (factor > 1) {
         val taps = 16 * factor + 1

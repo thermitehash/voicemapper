@@ -2,6 +2,7 @@
 
 iOS voice-training app (SwiftUI, iOS 17+, Swift 6). Fully local: no network code, analytics, or third-party SDKs.
 Guiding principle: help the user reach *their* voice goal safely — no "correct" voice, strain prevention built in.
+Data rule (Nov 2026): measurement, corrections and localisation stay true to the data and neutral between goals. A correction may move readings only because the measurement was wrong, never because of who the user is. Anything directional (hold steps, hints, plan wording) points only towards the user's own goal. Note which group (trans fem, trans masc, nonbinary, cis) the evidence comes from; see `docs/LOCALIZATION.md` §3.
 
 Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES.md`. Progression system (S14): `docs/PROGRESSION.md`. DSP accuracy results: `docs/ACCURACY.md`. Launch markets, regional English and accent effects (S17): `docs/LOCALIZATION.md`. After any DSP or mapping change, run `Tools/DSPCheck/run.sh --test` and `Tools/MappingTests/run.sh`; both must exit 0.
 
@@ -18,7 +19,7 @@ Full approved plan: `docs/PLAN.md`. Approved screen wireframes: `docs/WIREFRAMES
 - Use Sonnet for routine UI sessions; Opus for DSP sessions (S3, S5, S6, S10).
 
 ## Android port (`android/`)
-Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test` (DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Build output goes to `*/build.nosync` because Documents is iCloud-synced (iCloud duplicated build files and broke R8). Branch: `claude/android-N`.
+Native Kotlin/Compose port; see `android/README.md`. **iOS stays the source of truth**: never change the iOS app to suit Android. `android/core` mirrors `DSP/` and `Analysis/` line for line; after any iOS change there, run `cd android && ./gradlew :core:test --rerun-tasks` (`--rerun-tasks` matters: Gradle doesn't track the Swift files ParityTest reads, so a cached run can hide a parity failure; DSP + mapping suites, plus `ParityTest`, which reads the Swift sources and fails on unported wording or constant changes). Build output goes to `*/build.nosync` because Documents is iCloud-synced (iCloud duplicated build files and broke R8). Branch: `claude/android-N`.
 
 | # | Session | Scope | Status |
 |---|---|---|---|
@@ -65,13 +66,13 @@ SwiftUI · AVAudioEngine · Accelerate/vDSP · Swift Charts · SwiftData
 | S15 | Verification | Automated accuracy tests: DSP pass/fail suite with tolerances, mapping-layer unit tests, real-voice reference set measured in Praat | Tests pass; real recordings within tolerance | done (real recordings pending) |
 | S16 | Buffer | Bug fixes | — | in progress (build 46 uploaded for internal testers; more fixes from device feedback) |
 | S17 | Localisation | Launch in US, Canada, UK, Australia, NZ (English only): regional spelling, professional names, therapist directories; accent analysis (`docs/LOCALIZATION.md`) | US/UK spelling and the right directory per region | done (build 47) |
-| S18 | Accent calibration | Rhotic F3 gate, accent ΔF offsets if > 3 points, optional Accent setting; Android port (see `docs/LOCALIZATION.md` §2–3) | Rhotic and non-rhotic speakers score alike | next (Opus) |
+| S18 | Accent calibration | Rhotic F3 gate; found and fixed higher voices reading up to 49 points too dark (pitch-blended LPC order); real-voice tests on Hillenbrand recordings; pitch-independence test; Android port. Accent offsets blocked on data (`docs/LOCALIZATION.md`, `docs/ACCURACY.md`) | Resonance reads alike across accents and pitches | done (not yet on TestFlight) |
 
 ## Launch markets (decided Nov 2026)
 US, Canada, UK, Australia, New Zealand; English only. Copy is written in British spelling; anything with a regional word (see `Analysis/RegionalSpelling.swift`) is shown with `Text(regional:)`. `Tools/MappingTests` fails if a UI literal skips it. Build 47 (S17) carries this; Android isn't ported yet.
 
 ## Next session: S16 Buffer, part 2 (Sonnet; Opus if a DSP fix is needed; build 48)
-S18 (accent calibration, Opus) can run before or after this.
+S18 is done on branch `claude/s18-accent` (PR). It changes resonance readings for higher voices a lot (darker → accurate), so tell testers what to look for in the next build's "What to Test": resonance on "ah"/"eh" at higher pitch, and whether the dot stays put while you only change pitch. Real-voice checks: unpack the Hillenbrand recordings (see `docs/ACCURACY.md` S18) and run `DSPCHECK_H95=<folder> Tools/DSPCheck/run.sh --test`.
 S1–S15 are merged into `main`. TestFlight's latest build is 47 (S17 localisation on top of S16 part 1, internal only; uploaded Nov 23 2026). External testers are still on build 45, pending Beta App Review.
 
 **Start here:** ask the user for feedback from device testing of builds 45/46 and fix what they report. The checks to ask about are in the "What to Test" notes for 45: the plan changes over several days, the hold step moves after 2 passing days, high "ah" stays in the right octave, rough or creaky speech doesn't read an octave low, and "Why this exercise" is clear. If they've recorded the reference WAVs, run the real-voice comparison first.

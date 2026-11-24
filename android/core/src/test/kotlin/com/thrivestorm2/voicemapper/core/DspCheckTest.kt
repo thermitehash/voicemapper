@@ -1,6 +1,7 @@
 package com.thrivestorm2.voicemapper.core
 
 import com.thrivestorm2.voicemapper.core.analysis.ResonanceScorer
+import com.thrivestorm2.voicemapper.core.dsp.PitchDetector
 import com.thrivestorm2.voicemapper.core.dsp.ResonanceTracker
 import org.junit.Test
 import java.io.File
@@ -56,7 +57,7 @@ class DspCheckTest {
 
         c.group("formants: ${vowels.size} vowels")
         for (v in vowels) {
-            val s = formantStats(synthesize(v.f0, v.formants, v.bandwidths))
+            val s = formantStats(synthesize(v.f0, v.formants, v.bandwidths), f0 = v.f0)
             for (i in 0 until 3) {
                 val m = s.formants[i]
                 if (m == null) { c.expect(false, "${v.label}: F${i + 1} missing"); continue }
@@ -90,8 +91,70 @@ class DspCheckTest {
             else c.expect(readings > 0) { "resonance gate: no readings at ${f0.toInt()} Hz (should read below 350)" }
         }
 
+        // Same mouth shape, different pitch → same score (iOS "pitch independence", S18).
+        c.group("pitch independence: fixed formants, 110–240 Hz")
+        val fixedSets = listOf("neutral" to neutral) + vowels.filter { "/u/" !in it.label }.map { it.label to it.formants }
+        for ((name, formants) in fixedSets) {
+            val scores = (110..240 step 10).mapNotNull { f0 ->
+                formantStats(synthesize(f0.toDouble(), formants, bw, seconds = 0.5), f0 = f0.toDouble()).spacing?.let { ResonanceScorer.score(it) }
+            }
+            if (scores.size != 14) { c.expect(false, "pitch independence $name: missing readings"); continue }
+            val span = scores.max() - scores.min()
+            c.expect(span <= 6.0) { "pitch independence $name: score spans ${fmt(span, 1)} points across 110–240 Hz" }
+        }
+
+        rhoticTests(c, bw)
         referenceTests(c)
         c.finish()
+    }
+
+    /** Mean displayed score of ResonanceTracker over a stream, pitch from PitchDetector. */
+    private fun trackerMeanScore(x: FloatArray): Double? {
+        val detector = PitchDetector(RATE)
+        var sum = 0.0
+        var n = 0
+        val tracker = ResonanceTracker(RATE) { r -> if (r != null) { sum += r.score; n++ } }
+        var i = 0
+        while (i + 512 <= x.size) {
+            val pitch = if (i + detector.frameLength <= x.size) detector.detect(x, i, detector.frameLength)?.frequency else null
+            tracker.process(x.copyOfRange(i, i + 512), pitch = pitch)
+            i += 512
+        }
+        return if (n > 0) sum / n else null
+    }
+
+    /** iOS DSPCheck `rhoticTests`: r-coloured vowels mustn't darken speech (S18). */
+    private fun rhoticTests(c: Checks, bw: List<Double>) {
+        c.group("rhotic gate: plain speech vs the same speech with r-coloured vowels")
+        val means = mapOf(
+            "m" to mapOf("iy" to listOf(139.0, 343.0, 2323.0, 3001.0, 3658.0), "eh" to listOf(127.0, 588.0, 1803.0, 2604.0, 3699.0),
+                "ae" to listOf(126.0, 591.0, 1930.0, 2595.0, 3642.0), "ah" to listOf(127.0, 756.0, 1309.0, 2535.0, 3684.0),
+                "uh" to listOf(129.0, 621.0, 1181.0, 2548.0, 3564.0), "ih" to listOf(136.0, 429.0, 2034.0, 2687.0, 3628.0),
+                "er" to listOf(131.0, 475.0, 1379.0, 1711.0, 3335.0)),
+            "w" to mapOf("iy" to listOf(227.0, 437.0, 2761.0, 3373.0, 4353.0), "eh" to listOf(213.0, 727.0, 2063.0, 2953.0, 4312.0),
+                "ae" to listOf(214.0, 676.0, 2335.0, 2973.0, 4315.0), "ah" to listOf(212.0, 921.0, 1526.0, 2832.0, 4291.0),
+                "uh" to listOf(218.0, 760.0, 1416.0, 2901.0, 4133.0), "ih" to listOf(225.0, 484.0, 2369.0, 3057.0, 4333.0),
+                "er" to listOf(218.0, 524.0, 1588.0, 1930.0, 3914.0)),
+        )
+        val order = listOf("iy", "eh", "ae", "ah", "uh", "ih", "iy", "ae", "ah")
+        for ((sex, m) in means) {
+            fun segment(v: String): FloatArray {
+                val f = m.getValue(v)
+                return synthesize(f[0], f.subList(1, 5) + (if (sex == "m") 4500.0 else 5000.0), bw, seconds = 0.4)
+            }
+            var plain = FloatArray(0)
+            var mixed = FloatArray(0)
+            order.forEachIndexed { i, v ->
+                val seg = segment(v)
+                plain += seg; mixed += seg
+                if (i % 2 == 1) mixed += segment("er")
+            }
+            val p = trackerMeanScore(plain)
+            val r = trackerMeanScore(mixed)
+            if (p == null || r == null) { c.expect(false, "rhotic $sex: no reading"); continue }
+            println("  $sex: plain ${fmt(p, 1)}, with r ${fmt(r, 1)}")
+            c.expect(abs(r - p) <= 3) { "rhotic $sex: r-coloured speech reads ${fmt(r - p, 1)} points off plain speech" }
+        }
     }
 
     /** Real-voice set: Tools/DSPCheck/reference/reference.json + WAVs (git-ignored). */
@@ -114,7 +177,7 @@ class DspCheckTest {
             val m = p.median
             if (m != null) c.expect(abs(cents(m, f0)) <= Tolerance.REAL_PITCH_CENTS) { "$file: F0 ${fmt(m, 1)} vs Praat ${fmt(f0, 1)} (${fmt(cents(m, f0), 1)} cents)" }
             else c.expect(false, "$file: no pitch reading")
-            val f = formantStats(x, rate)
+            val f = formantStats(x, rate, f0)
             fs.forEachIndexed { i, truth ->
                 if (truth == null) return@forEachIndexed
                 val v = f.formants[i]
