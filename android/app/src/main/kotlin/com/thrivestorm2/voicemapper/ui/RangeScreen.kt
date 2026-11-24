@@ -1,7 +1,10 @@
 package com.thrivestorm2.voicemapper.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +57,7 @@ fun RangeScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
     val prefs = model.prefs
     val goal = prefs.goal
     val currentId = pitch?.let { RangeTable.rowId(it.note) }
+    val dark = isSystemInDarkTheme()
     var info by remember { mutableStateOf(false) }
 
     // First tap sets a one-note goal, a second on another row stretches it to a
@@ -86,7 +90,12 @@ fun RangeScreen(model: VoiceModel, requestMic: (() -> Unit) -> Unit) {
                 val current = row.id == currentId
                 Row(
                     Modifier.weight(1f).fillMaxWidth()
-                        .background(when { current -> Accent.copy(alpha = 0.2f); inGoal -> Teal.copy(alpha = 0.18f); else -> Color.Transparent })
+                        // Stronger tints in dark mode, a goal edge stripe and a
+                        // border on the live note, so neither relies on a faint tint.
+                        .background(if (inGoal) Teal.copy(alpha = if (dark) 0.4f else 0.18f) else Color.Transparent)
+                        .background(if (current) Accent.copy(alpha = if (dark) 0.5f else 0.25f) else Color.Transparent)
+                        .drawBehind { if (inGoal) drawRect(Teal, size = Size(5.dp.toPx(), size.height)) }
+                        .then(if (current) Modifier.border(if (dark) 2.5.dp else 2.dp, Accent) else Modifier)
                         .clickable(role = Role.Button, onClickLabel = "Set your goal range") { tap(row.id) }
                         .padding(horizontal = 16.dp)
                         .semantics(mergeDescendants = true) {

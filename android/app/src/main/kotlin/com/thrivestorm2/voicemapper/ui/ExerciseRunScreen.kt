@@ -242,7 +242,7 @@ fun ExerciseRunScreen(model: VoiceModel, exercise: Exercise, requestMic: (() -> 
                         val current = k.steps[minOf(step, k.steps.lastIndex)]
                         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("Step ${minOf(step, k.steps.lastIndex) + 1} of ${k.steps.size}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(current.text, style = MaterialTheme.typography.titleLarge)
+                            Text(rs(current.text), style = MaterialTheme.typography.titleLarge)
                             LinearProgressIndicator(progress = { minOf(stepElapsed / current.seconds, 1.0).toFloat() }, Modifier.fillMaxWidth())
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("${ceil(maxOf(0.0, current.seconds - stepElapsed)).toInt()} s left", Modifier.weight(1f),
@@ -279,8 +279,8 @@ fun ExerciseRunScreen(model: VoiceModel, exercise: Exercise, requestMic: (() -> 
                         }
                     }
                     is Exercise.Kind.Reading -> Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Read aloud slowly, using the voice you're practising. Stop and breathe whenever you need to.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(RainbowPassage.TEXT, style = MaterialTheme.typography.titleLarge)
+                        Text(rs("Read aloud slowly, using the voice you're practising. Stop and breathe whenever you need to."), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(rs(RainbowPassage.TEXT), style = MaterialTheme.typography.titleLarge)
                         Text(RainbowPassage.CITATION, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         LinearProgressIndicator(progress = { minOf(readSeconds / k.seconds, 1.0).toFloat() }, Modifier.fillMaxWidth())
                         Text("${readSeconds.toInt()} s of ${k.seconds.toInt()} s voiced", color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -302,10 +302,10 @@ private fun FinishedView(exercise: Exercise, nextStepMessage: String?, semitoneR
         nextStepMessage?.let { Text(it, textAlign = TextAlign.Center) }
         if (exercise.id == Exercise.INTONATION_ID && semitoneRange != null && !tooLittleVoice)
             Text("Your pitch moved across about ${swiftRound(semitoneRange)} semitones. There's no right amount: use the melody that feels like you.", textAlign = TextAlign.Center)
-        if (tooLittleVoice) Text("The mic heard very little voice, so this won't count towards your stage. Next time, tap Start and practise aloud.", textAlign = TextAlign.Center, color = muted)
+        if (tooLittleVoice) Text(rs("The mic heard very little voice, so this won't count towards your stage. Next time, tap Start and practise aloud."), textAlign = TextAlign.Center, color = muted)
         else if (strainAlerts > 0) Text("There was a strain alert during this exercise, so it won't count towards moving on. Rest your voice before trying again.", textAlign = TextAlign.Center, color = muted)
         if (exercise.isCoolDown) Text("Nice work today. Rest your voice and drink some water.", textAlign = TextAlign.Center)
-        else if (!coolDownDone) Text("When you've finished practising for today, end with the cool-down.", textAlign = TextAlign.Center, color = muted)
+        else if (!coolDownDone) Text(rs("When you've finished practising for today, end with the cool-down."), textAlign = TextAlign.Center, color = muted)
         Button(onClick = onClose) { Text("Back to exercises") }
     }
 }
@@ -321,12 +321,12 @@ private fun BasisView(basis: Exercise.Basis) {
     Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), RoundedCornerShape(12.dp)).padding(12.dp)) {
         Row(Modifier.fillMaxWidth().clickable { open = !open }, verticalAlignment = Alignment.CenterVertically) {
             Text("Why this exercise", Modifier.weight(1f))
-            Text(basis.strength.label, style = MaterialTheme.typography.labelSmall,
+            Text(rs(basis.strength.label), style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.background(tint.copy(alpha = 0.15f), CircleShape).padding(horizontal = 8.dp, vertical = 3.dp))
             Icon(if (open) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, if (open) "Collapse" else "Expand")
         }
         if (open) Column(Modifier.padding(top = 6.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(basis.summary, style = MaterialTheme.typography.bodyMedium)
+            Text(rs(basis.summary), style = MaterialTheme.typography.bodyMedium)
             basis.citations.forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             Text("Keep to a comfortable volume, and stop if anything hurts or feels scratchy.", style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -112,7 +112,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [1, 2, 3, 4, 5, 6],
             basis: Basis(
                 strength: .research,
-                summary: "Hums, trills and sirens are semi-occluded vocal tract exercises: partly closing the lips makes voicing easier and lowers how hard the vocal folds collide. A trial found that this kind of practice helped people with tired or hoarse voices. The yawn-sigh widens the throat (seen on endoscopy). The breathing step is common practice but has little direct evidence.",
+                summary: "Hums, trills and sirens are semi-occluded vocal tract exercises: partly closing the lips makes voicing easier and lowers how hard the vocal folds collide. A trial in adults with tired or hoarse voices found that this kind of practice helped. The yawn-sigh widens the throat (seen on endoscopy). The breathing step is common practice but has little direct evidence.",
                 citations: [Source.titze2006, Source.kapsnerSmith2015, Source.boone1993])),
         Exercise(
             id: "hums", title: "Easy hums into words", symbol: "waveform",
@@ -126,7 +126,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [1],
             basis: Basis(
                 strength: .research,
-                summary: "Resonant voice therapy aims for an easy voice with vibration felt at the front of the mouth, built up from hums into words and phrases. A systematic review rated its evidence as moderate.",
+                summary: "Resonant voice therapy aims for an easy voice with vibration felt at the front of the mouth, built up from hums into words and phrases. A systematic review rated its evidence as moderate. The studies treated voice problems (an early trial: 13 women with vocal nodules), not voice training for gender.",
                 citations: [Source.verdolini1995, Source.yiu2017])),
         Exercise(
             id: "slides", title: "Pitch slides", symbol: "arrow.up.right",
@@ -139,7 +139,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [1, 2],
             basis: Basis(
                 strength: .research,
-                summary: "Glides are part of Vocal Function Exercises, which improved voice production in a controlled trial. Gliding on a semi-occluded sound like \"ng\" is a recognised way to work the middle and upper range without strain.",
+                summary: "Glides are part of Vocal Function Exercises, which improved voice production in a controlled trial of 35 women with healthy voices. Gliding on a semi-occluded sound like \"ng\" is a recognised way to work the middle and upper range without strain.",
                 citations: [Source.stemple1994, Source.titze2006, Source.davies2015])),
         Exercise(
             id: holdID, title: "Hold target pitch", symbol: "scope",
@@ -148,28 +148,28 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [2, 4],
             basis: Basis(
                 strength: .clinical,
-                summary: "Clinicians pick a training pitch that's easy to produce and practise holding it. They often start near your usual pitch and move it gradually, a step at a time. Sustained notes are also part of Vocal Function Exercises.",
+                summary: "In clinical guidance for trans and gender-diverse people, clinicians pick a training pitch that's easy to produce and practise holding it. They often start near your usual pitch and move it gradually, a step at a time. Sustained notes are also part of Vocal Function Exercises.",
                 citations: [Source.davies2015, Source.stemple1994])),
         Exercise(
             id: "forwardback", title: "Resonance: forward ↔ back", symbol: "mouth",
             summary: "Move your tongue and lips to change how bright or dark you sound.",
             kind: .guided([
                 Step(text: "Say \"ee\" with your tongue high and forward and your lips slightly spread. Watch the score.", seconds: 20),
-                Step(text: "Now \"oo\" with your tongue pulled back and your lips rounded. Watch the score move.", seconds: 20),
+                Step(text: "Now a deep \"oo\": tongue pulled well back, lips rounded. Your everyday \"oo\" may sit further forward. Watch the score move.", seconds: 20),
                 Step(text: "Glide slowly between the two shapes on one note. Notice what changes in your mouth.", seconds: 30),
                 Step(text: "Pick the tongue and lip shape you're aiming for and keep it while you say \"hee\", \"hey\", \"hi\".", seconds: 30),
             ]),
             stages: [3],
             basis: Basis(
                 strength: .research,
-                summary: "Tongue position and lip shape change the vocal tract resonances (formants). In a clinical study, forward tongue carriage and slightly spread lips raised all three formants. Rounding the lips and drawing the tongue back works the other way. This replaces the \"big dog / small dog\" drill, which comes from online voice-training communities and has no published support.",
+                summary: "Tongue position and lip shape change the vocal tract resonances (formants). In a clinical study of 10 trans women, forward tongue carriage and slightly spread lips raised all three formants. Rounding the lips and drawing the tongue back works the other way by the same physics, but no trial has tested it for darkening a voice. This replaces the \"big dog / small dog\" drill, which comes from online voice-training communities and has no published support.",
                 citations: [Source.carew2007, Source.davies2015]),
             showsResonance: true),
         Exercise(
             id: "vowels", title: "Vowel ladder (ee/ah)", symbol: "textformat.abc",
             summary: "Sustained vowels on one note, keeping resonance steady.",
             kind: .guided([
-                Step(text: "Sustain \"ee\" on a comfortable note near your goal.", seconds: 15),
+                Step(text: "Sustain \"ee\" on a comfortable note near your goal. Hold it steady, without gliding.", seconds: 15),
                 Step(text: "Same note, now \"ah\". Try to keep the resonance score close to your \"ee\".", seconds: 15),
                 Step(text: "Back to \"ee\".", seconds: 15),
                 Step(text: "\"ah\" again, keeping the same mouth space.", seconds: 15),
@@ -178,7 +178,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [3, 4, 6],
             basis: Basis(
                 strength: .research,
-                summary: "Using one vowel's mouth shape as a model for the others is a described clinical technique. On-screen formant feedback, like the resonance meter here, helped people shift their resonance in a small study.",
+                summary: "Using one vowel's mouth shape as a model for the others is a described clinical technique. On-screen formant feedback, like the resonance meter here, helped trans women brighten their resonance in a small study.",
                 citations: [Source.davies2015, Source.kawitzky2020]),
             showsResonance: true),
         Exercise(
@@ -193,7 +193,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [4, 5],
             basis: Basis(
                 strength: .clinical,
-                summary: "Speech therapy builds from sounds to words to longer phrases while keeping the voice easy. Practising everyday words and real-life phrases is a recommended way to carry the voice into daily life.",
+                summary: "Clinical guidance for trans and gender-diverse people builds from sounds to words to longer phrases while keeping the voice easy. Practising everyday words and real-life phrases is a recommended way to carry the voice into daily life.",
                 citations: [Source.davies2015]),
             showsResonance: true),
         Exercise(
@@ -203,7 +203,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [5, 6],
             basis: Basis(
                 strength: .clinical,
-                summary: "The Rainbow Passage is a standard text for voice assessment. Reading aloud is the step between phrases and free conversation in recognised voice-training plans.",
+                summary: "The Rainbow Passage is a standard text for voice assessment. Reading aloud is the step between phrases and free conversation in clinical guidance for trans and gender-diverse voice training.",
                 citations: [Source.fairbanks1960, Source.davies2015])),
         Exercise(
             id: intonationID, title: "Intonation", symbol: "point.topleft.down.to.point.bottomright.curvepath",
@@ -217,7 +217,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [5],
             basis: Basis(
                 strength: .research,
-                summary: "Intonation affects how voices are perceived. One study linked more upward glides and a wider semitone range with being heard as female. Other studies found the opposite, so there's no single right amount. The app shows your range but doesn't set a target.",
+                summary: "Intonation affects how voices are perceived. In a study of cis and trans speakers, listeners heard speakers with more upward glides and a wider semitone range as female. Other studies found the opposite, so there's no single right amount. The app shows your range but doesn't set a target.",
                 citations: [Source.hancock2014, Source.leung2018])),
         Exercise(
             id: "weight", title: "Lighter ↔ heavier", symbol: "scalemass",
@@ -231,7 +231,7 @@ struct Exercise: Identifiable, Hashable, Sendable {
             stages: [6],
             basis: Basis(
                 strength: .limited,
-                summary: "Vocal weight is mostly a voice-training idea. A model study suggests that voice quality (spectral shape) affects gender perception alongside pitch, and a review found mixed results for breathiness. No study has tested a weight drill directly. Never press or squeeze to get a heavier sound.",
+                summary: "Vocal weight is mostly a voice-training idea. A computer-model study suggests that voice quality (spectral shape) affects gender perception alongside pitch, and a review found mixed results for breathiness. No study has tested a weight drill directly. Never press or squeeze to get a heavier sound.",
                 citations: [Source.zhang2022, Source.leung2018, Source.davies2015])),
         Exercise(
             id: coolDownID, title: "Cool-down", symbol: "moon.stars",
@@ -251,8 +251,8 @@ struct Exercise: Identifiable, Hashable, Sendable {
 }
 
 enum RainbowPassage {
-    static let text = "When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. The rainbow is a division of white light into many beautiful colours. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow."
-    static let citation = "The Rainbow Passage (first paragraph), from Fairbanks, G. (1960), Voice and Articulation Drillbook, 2nd ed., Harper & Row."
+    static let text = "When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. The rainbow is a division of white light into many beautiful colours. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow.\n\nThroughout the centuries people have explained the rainbow in various ways. Some have accepted it as a miracle without physical explanation. To the Hebrews it was a token that there would be no more universal floods. The Greeks used to imagine that it was a sign from the gods to foretell war or heavy rain. The Norsemen considered the rainbow as a bridge over which the gods passed from earth to their home in the sky. Others have tried to explain the phenomenon physically. Aristotle thought that the rainbow was caused by reflection of the sun's rays by the rain. Since then physicists have found that it is not reflection, but refraction by the raindrops which causes the rainbows. Many complicated ideas about the rainbow have been formed. The difference in the rainbow depends considerably upon the size of the drops, and the width of the coloured band increases as the size of the drops increases. The actual primary rainbow observed is said to be the effect of super-imposition of a number of bows. If the red of the second bow falls upon the green of the first, the result is to give a bow with an abnormally wide yellow band, since red and green light when mixed form yellow. This is a very common type of bow, one showing mainly red and yellow, with little or no green or blue. The Rainbow Passage, a public-domain text, can be found on page 127 of the 2nd edition of"
+    static let citation = "The Rainbow Passage, from Fairbanks, G. (1960), Voice and Articulation Drillbook, 2nd ed., Harper & Row."
 }
 
 /// Which exercises are done today, stored as one `@AppStorage` string

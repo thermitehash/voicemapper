@@ -118,11 +118,11 @@ private fun MainSettings(model: VoiceModel, onGoal: () -> Unit, onSources: () ->
             HorizontalDivider()
             ToggleRow("Strain alerts", prefs.strainAlerts) { prefs.strainAlerts = it }
         } }
-        Footer("Strain alerts compare clarity, steadiness, pitch and loudness against your baseline (or the first minute of a session) and suggest a rest. They're an estimate, not a diagnosis: if you have pain or lasting hoarseness, see a speech-language pathologist.")
+        Footer(rs("Strain alerts compare clarity, steadiness, pitch and loudness against your baseline (or the first minute of a session) and suggest a rest. They're an estimate, not a diagnosis: if you have pain or lasting hoarseness, see a speech-language pathologist."))
 
         SectionHeader("Display")
-        Card { ToggleRow("Colour-blind palette", prefs.colourBlind) { prefs.colourBlind = it } }
-        Footer("Uses blue, grey and orange for the usually-read-male, ambiguous and usually-read-female zones. Zones always have M / A / F labels too.")
+        Card { ToggleRow(rs("Colour-blind palette"), prefs.colourBlind) { prefs.colourBlind = it } }
+        Footer(rs("Uses blue, grey and orange for the usually-read-male, ambiguous and usually-read-female zones. Zones always have M / A / F labels too."))
 
         SectionHeader("Privacy")
         Card { Column {
@@ -142,7 +142,7 @@ private fun MainSettings(model: VoiceModel, onGoal: () -> Unit, onSources: () ->
             LinkRow("Research sources", onClick = onSources)
             HorizontalDivider()
             Row(Modifier.fillMaxWidth().clickable {
-                context.startActivity(Intent(Intent.ACTION_VIEW, "https://find.asha.org/pro/".toUri()))
+                context.startActivity(Intent(Intent.ACTION_VIEW, therapistDirectory().url.toUri()))
             }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Find a voice therapist", Modifier.weight(1f), color = Accent)
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = Accent)

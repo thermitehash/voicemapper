@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.thrivestorm2.voicemapper.core.analysis.PerceivedGender
+import com.thrivestorm2.voicemapper.core.analysis.RegionalSpelling
 import com.thrivestorm2.voicemapper.core.analysis.Rgb
+import java.util.Locale
 
 /** iOS system blue, so the accent matches the iPhone app. */
 val Accent = Color(0xFF0A84FF)
@@ -34,3 +36,12 @@ fun VoiceMapperTheme(content: @Composable () -> Unit) {
         lightColorScheme(primary = Accent, secondary = Teal)
     MaterialTheme(colorScheme = scheme, content = content)
 }
+
+/** [text] respelled for the user's English (US, Canadian, or British/Australian/NZ); see core `RegionalSpelling`. */
+fun rs(text: String): String {
+    val locale = Locale.getDefault()
+    return RegionalSpelling.apply(text, RegionalSpelling.variant(listOf(locale.toLanguageTag()), locale.country))
+}
+
+/** Settings ▸ Find a voice therapist: the directory for the device's region. */
+fun therapistDirectory(): RegionalSpelling.Directory = RegionalSpelling.directory(Locale.getDefault().country)

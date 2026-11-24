@@ -203,12 +203,12 @@ fun PitchResonanceGrid(
             onDismissRequest = { showingInfo = false },
             confirmButton = { TextButton(onClick = { showingInfo = false }) { Text("OK") } },
             title = { Text("About the grid") },
-            text = { Text(GRID_INFO) },
+            text = { Text(rs(GRID_INFO)) },
         )
     }
 }
 
-const val GRID_INFO = "Up is higher pitch, right is brighter resonance (formant spacing).\n\nShaded areas show where voices are typically heard as male (M), ambiguous (A) or female (F). The colours blend because there are no hard edges: they're typical ranges, not rules, and intonation, vowels and speech habits matter too.\n\nSet a pitch goal by tapping notes on the Range tab. Set a resonance goal by dragging sideways across the grid; tap the grid to clear it.\n\nVowels change resonance a lot (“ee” reads brighter than “oo”), so compare on the same vowel. There's no correct place on this grid. Work toward what feels like your voice."
+const val GRID_INFO = "Up is higher pitch, right is brighter resonance (formant spacing).\n\nShaded areas show where voices are typically heard as male (M), ambiguous (A) or female (F). The colours blend because there are no hard edges: they're typical ranges, not rules, and intonation, vowels and speech habits matter too.\n\nSet a pitch goal by tapping notes on the Range tab. Set a resonance goal by dragging sideways across the grid; tap the grid to clear it.\n\nVowels change resonance a lot (“ee” reads brighter than “oo”), so compare on the same vowel. There's no correct place on this grid. Work toward what feels like your voice." // regional: shown via rs()
 
 private fun hint(pitch: PitchReading?, resonance: ResonanceReading?, goal: ResonanceGoal?): String {
     if (pitch == null) return " "

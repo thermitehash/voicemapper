@@ -58,7 +58,7 @@ fun SafetyAlert(model: VoiceModel) {
             "Dismiss" to { model.dismissAlert() })
         is StrainGuard.Alert.DailyCap -> Quad(
             "Daily practice cap reached",
-            "You've practised ${alert.minutes} minutes today. Short, regular sessions are kinder to your voice than long ones.",
+            rs("You've practised ${alert.minutes} minutes today. Short, regular sessions are kinder to your voice than long ones."),
             "Stop for today" to { model.stopForToday() },
             "5 more minutes" to { model.dismissAlert() })
     }
@@ -69,7 +69,7 @@ fun SafetyAlert(model: VoiceModel) {
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(message)
-                Text("This is an estimate, not a diagnosis. If you have pain, lasting hoarseness or lose your voice, see a speech-language pathologist.",
+                Text(rs("This is an estimate, not a diagnosis. If you have pain, lasting hoarseness or lose your voice, see a speech-language pathologist."),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },

@@ -20,6 +20,7 @@ tasks.test {
     // The iOS sources, for the parity checks (iOS stays the source of truth).
     systemProperty("voicemapper.iosRoot", rootDir.resolve("../VoiceMapper").absolutePath)
     systemProperty("voicemapper.reference", rootDir.resolve("../Tools/DSPCheck/reference").absolutePath)
+    systemProperty("voicemapper.appUi", rootDir.resolve("app/src/main/kotlin/com/thrivestorm2/voicemapper/ui").absolutePath)
     testLogging {
         events("failed")
         showStandardStreams = true

@@ -97,7 +97,7 @@ So a vowel that moves F2 or F3 by several hundred Hz moves that frame by 10–50
 ### E. Pitch zones and perception. Priority: low, no change proposed
 - **What's known:** the 145/175 Hz boundaries come from North American speakers and listeners. Published differences in average speaking pitch between these five Englishes are small compared with differences between individuals, and there is little listener data from the UK, Australia or NZ.
 - **Proposed fix:** don't add per-accent pitch offsets without evidence. Optionally make the grid's info text say "typical ranges from mostly North American research".
-  - Pemberton, McCormack & Russell (1998) reported Australian women's speaking pitch falling over several decades. Confirm their figures before citing them anywhere in the app.
+  - Pemberton et al. (1998) reportedly found Australian women's speaking pitch falling over several decades. Only secondary sources were found, and they conflict, so don't cite it in the app.
 
 ### F. Uptalk (high rising terminal; Australia, NZ, and increasingly UK and US). Priority: none
 - **What happens:** rises at the end of statements widen the 10–90th percentile pitch range and nudge the median up slightly.
@@ -146,9 +146,11 @@ Sources for this section: [Leung et al. 2018 (ERIC)](https://eric.ed.gov/?id=EJ1
 - Clarke, S., Elms, F., & Youssef, A. (1995). The third dialect of English: Some Canadian evidence. *Language Variation and Change*, 7(2), 209–228.
 - Cox, F. (2006). The acoustic characteristics of /hVd/ vowels in the speech of some Australian teenagers. *Australian Journal of Linguistics*, 26(2), 147–179.
 - Deterding, D. (1997). The formants of monophthong vowels in Standard Southern British English pronunciation. *Journal of the International Phonetic Association*, 27(1–2), 47–55.
-- Gelfer, M. P., & Mikos, V. A. (2005). The relative contributions of speaking fundamental frequency and formant frequencies to gender identification. *Journal of Voice*, 19(4), 544–554.
+- Gelfer, M. P., & Mikos, V. A. (2005). The relative contributions of speaking fundamental frequency and formant frequencies to gender identification based on isolated vowels. *Journal of Voice*, 19(4), 544–554.
 - Hawkins, S., & Midgley, J. (2005). Formant frequencies of RP monophthongs in four age groups of speakers. *JIPA*, 35(2), 183–199.
 - Hillenbrand, J., Getty, L. A., Clark, M. J., & Wheeler, K. (1995). Acoustic characteristics of American English vowels. *JASA*, 97(5), 3099–3111.
 - Watson, C. I., Maclagan, M., & Harrington, J. (2000). Acoustic evidence for vowel change in New Zealand English. *Language Variation and Change*, 12(1), 51–68.
 
-Citations are from memory. Check them before they go into the in-app Research sources.
+**Checked (S19, Nov 2026):** volume and pages were confirmed against publisher or index records for all entries above. Gelfer & Mikos's title was corrected to the full form.
+- Also confirmed: Watson, Harrington & Evans (1998), An acoustic comparison between New Zealand and Australian English vowels, *Australian Journal of Linguistics*, 18(2), 185–207. Read in full: F1/F2 is given in plots only, with no tables of means.
+- **Not verified:** Pemberton et al. (1998, *Journal of Voice*) on Australian women's speaking pitch falling between the 1940s and 1990s. The study exists according to secondary sources, but they disagree on the authors, affiliation and figures. Don't cite it in the app until the original is read.

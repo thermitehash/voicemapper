@@ -481,5 +481,6 @@ private struct ResonanceMeter: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Resonance")
         .accessibilityValue(score.map { "\(Int($0.rounded())) of 100, darker to brighter" } ?? "No reading")
+        .accessibilityAddTraits(.updatesFrequently)
     }
 }
