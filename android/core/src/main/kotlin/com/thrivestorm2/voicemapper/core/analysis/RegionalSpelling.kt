@@ -42,6 +42,8 @@ object RegionalSpelling {
         "GB", "IM", "JE", "GG" -> Directory("ASLTIP (independent speech and language therapists)", "https://asltip.com/find-a-speech-therapist/")
         "AU" -> Directory("Speech Pathology Australia", "https://speechpathologyaustralia.org.au/find-a-speech-pathologist")
         "NZ" -> Directory("New Zealand Speech-language Therapists' Association", "https://speechtherapy.org.nz/find-a-therapist/")
+        // Iceland (English-only listing): the association's public member list, in Icelandic.
+        "IS" -> Directory("Félag talmeinafræðinga á Íslandi (member list, in Icelandic)", "https://www.talmein.is/felagatal/")
         else -> Directory("ASHA ProFind", "https://find.asha.org/pro/")
     }
 
