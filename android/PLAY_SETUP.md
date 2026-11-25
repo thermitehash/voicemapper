@@ -85,5 +85,6 @@ The "contains native code, no debug symbols" warning is harmless: the only nativ
 
 ## Status (Nov 25 2026)
 - Internal testing: 0.3 (versionCode 3), installed and working on the Moto G Play.
-- Closed testing Alpha: 0.4 (versionCode 4, same code as 0.3), sent for review Nov 25 2026.
+- Closed testing Alpha: 0.4 (versionCode 4, same code as 0.3), sent for review Nov 25 2026; approval still pending.
+- Alpha opt-in link: https://play.google.com/apps/testing/com.thermitehash.voicemapper (works only for accounts on the Alpha tester list or Google Group, and only once the review passes).
 - Still to check: whether testers are charged for the paid app; app pricing once the review passes.
