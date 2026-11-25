@@ -13,7 +13,7 @@ Builds go to `app/build.nosync` so iCloud Drive doesn't duplicate build files (s
 | Field | Answer |
 |---|---|
 | App name | VoiceMapper |
-| Default language | English (United Kingdom) or (United States) |
+| Default language | English (United States) (as used) |
 | App or game | App |
 | Free or paid | Paid ($4.99). Pick Paid here: Play never lets a free app become paid later |
 
