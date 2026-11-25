@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.thrivestorm2.voicemapper"
+        applicationId = "com.thermitehash.voicemapper"
         // Android 8.0+: covers the testers' Galaxy A52 (Android 14) and S22 (Android 16).
         minSdk = 26
         targetSdk = 36
